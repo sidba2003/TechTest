@@ -8,4 +8,14 @@
     <ProjectReference Include="..\UserManagement.Services\UserManagement.Services.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\react-app\public\" />
+    <Folder Include="wwwroot\react-app\src\assets\" />
+  </ItemGroup>
+
+  <Target Name="BuildReact" BeforeTargets="Build">
+    <Exec WorkingDirectory="wwwroot/react-app" Command="npm install" />
+    <Exec WorkingDirectory="wwwroot/react-app" Command="npm run build" />
+  </Target>
+
 </Project>

@@ -4,7 +4,7 @@ using Westwind.AspNetCore.Markdown;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Add services
 builder.Services
     .AddDataAccess()
     .AddDomainServices()
@@ -13,15 +13,18 @@ builder.Services
 
 var app = builder.Build();
 
-app.UseMarkdown();
-
 app.UseHsts();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.UseDefaultFiles();
 
 app.UseRouting();
 app.UseAuthorization();
 
-app.MapDefaultControllerRoute();
+// Map API controllers
+app.MapControllers();
+
+// Serve React app for any non-API route
+app.MapFallbackToFile("react-app/dist/index.html");
 
 app.Run();
