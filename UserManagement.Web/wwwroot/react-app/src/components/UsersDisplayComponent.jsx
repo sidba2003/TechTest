@@ -9,22 +9,22 @@ export default function UsersDisplayComponent() {
     const [users, setUsers] = useState([]);
 
     useEffect(
-            () => {
-                const fetchUsers = async () => {
-                    try {
-                        const res = await fetch("/api/users");
-                        if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
-                        const data = await res.json();
-    
-                        setUsers(data);
-                    } catch (err) {
-                        console.error("Failed to fetch users:", err);
-                    }
+        () => {
+            const fetchUsers = async () => {
+                try {
+                    const res = await fetch("/api/users");
+                    if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
+                    const data = await res.json();
+
+                    setUsers(data);
+                } catch (err) {
+                    console.error("Failed to fetch users:", err);
                 }
-    
-                fetchUsers();
-            }, []
-        );
+            }
+
+            fetchUsers();
+        }, []
+    );
 
     const userDataDisplay = users
                             .filter(data => {
