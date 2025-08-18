@@ -1,3 +1,7 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
 using UserManagement.Models;
 using UserManagement.Services.Domain.Interfaces;
 using UserManagement.Web.Models.Users;
@@ -18,13 +22,16 @@ public class UserControllerTests
         var result = controller.List();
 
         // Assert: Verifies that the action of the method under test behaves as expected.
-        result.Model
-            .Should().BeOfType<UserListViewModel>()
-            .Which.Items.Should().BeEquivalentTo(users);
+        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        var value = okResult.Value.Should().BeAssignableTo<IEnumerable<User>>().Subject;
+
+        value.Should().BeEquivalentTo(users);
     }
 
-    private User[] SetupUsers(string forename = "Johnny", string surname = "User", string email = "juser@example.com", bool isActive = true)
+    private User[] SetupUsers(string forename = "Johnny", string surname = "User", string email = "juser@example.com", bool isActive = true, DateTime DateOfBirth = default(DateTime))
     {
+        DateOfBirth = DateOfBirth.Date;
+
         var users = new[]
         {
             new User
@@ -32,7 +39,8 @@ public class UserControllerTests
                 Forename = forename,
                 Surname = surname,
                 Email = email,
-                IsActive = isActive
+                IsActive = isActive,
+                DateOfBirth = DateOfBirth
             }
         };
 

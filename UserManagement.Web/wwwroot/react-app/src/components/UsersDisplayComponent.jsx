@@ -52,6 +52,7 @@ export default function UsersDisplayComponent() {
                 <span className="table-header-class">Email</span>
                 <span className="table-header-class">Surname</span>
                 <span className="table-header-class">Forename</span>
+                <span className="table-header-class">Date of Birth</span>
                 <span className="table-header-class">isActive</span>
                 {userDataDisplay}
             </div>
