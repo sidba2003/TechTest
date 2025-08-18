@@ -49,8 +49,10 @@ html, body {
 
 .user-active-filter-class {
     display: flex;
-    justify-content: space-between;
+    justify-content: left;
     align-items: center;
+
+    width: 100%;
 }
 
 .filter-class > label > input[type="checkbox"] {
@@ -67,4 +69,6 @@ html, body {
 
 .filter-class {
     font-size: larger;
+
+    margin: 25px;
 }
