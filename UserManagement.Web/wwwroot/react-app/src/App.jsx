@@ -1,7 +1,10 @@
-﻿export default function App() {
+﻿import UsersDisplayComponent from './components/UsersDisplayComponent.jsx';
+
+export default function App() {
+
     return (
-        <>
-            Hello, world!
-        </>
+        <div className="main-content-class">
+            <UsersDisplayComponent />
+        </div>
     );
 }
