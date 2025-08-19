@@ -1,12 +1,12 @@
 .main-content-class {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-
-    height: calc(100vh - 250px);
-
-    padding: 50px;
+    justify-content: flex-start; 
+    align-items: stretch;
+    min-height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
 }
 
 #root {
@@ -47,7 +47,7 @@ html, body {
     border-bottom: solid;
 }
 
-.user-active-filter-class {
+.user-options-class {
     display: flex;
     justify-content: left;
     align-items: center;
@@ -71,4 +71,113 @@ html, body {
     font-size: larger;
 
     margin: 25px;
+}
+
+.add-user-button-class {
+    margin-left: auto;
+
+    width: 115px;
+    height: 35px;
+
+    background-color: rgb(224, 196, 102);
+
+    border-width: 1px;
+    border-radius: 8px;
+    border-color: rgb(104, 81, 6);
+
+    font-size: large;
+}
+
+.add-user-button-class:hover {
+    opacity: .75;
+
+    border-color: rgb(73, 57, 5);
+    box-shadow: 8px 8px 12px rgba(187, 133, 33, 0.76);
+}
+
+.add-user-button-class:active {
+    opacity: .5;
+
+    border-color: rgb(20, 16, 0);
+    box-shadow: 5px 5px 5px rgba(187, 133, 33, 0.76);
+}
+
+.add-user-popup-class {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-height: 80vh;
+    overflow-y: auto;
+    width: 100%;
+    max-width: 400px;
+    z-index: 999;
+    background-color: rgb(224, 196, 102);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+
+    border-radius: 8px;
+    padding: 25px;
+}
+
+.add-user-popup-class > label > input {
+    width: 155px;
+    height: 28px;
+
+    margin: 10px;
+}
+
+.add-user-popup-class > label {
+    font-size: large;
+    margin: 6px;
+}
+
+.popup-button-class {
+    width: 115px;
+    height: 35px;
+    border: none;
+}
+
+.cancel-button {
+    background-color: rgb(207, 87, 87);
+    font-size: large;
+    font-weight: bold;
+    border-radius: 8px;
+}
+
+.cancel-button:hover {
+    opacity: 0.75;
+    box-shadow: 8px 8px 11px rgb(141, 46, 46);
+}
+
+.cancel-button:active {
+    opacity: 0.50;
+    box-shadow: 8px 8px 11px rgb(141, 46, 46);
+}
+
+.popup-buttons-class {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    width: 100%;
+}
+
+.submit-button {
+    background-color: rgb(48, 150, 45);
+    font-size: large;
+    font-weight: bold;
+    border-radius: 8px;
+}
+
+.submit-button:hover {
+    opacity: 0.75;
+    box-shadow: 8px 8px 11px rgb(29, 70, 27);
+}
+
+.submit-button:active {
+    opacity: 0.50;
+    box-shadow: 8px 8px 11px rgb(29, 70, 27);
 }

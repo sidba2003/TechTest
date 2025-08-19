@@ -1,4 +1,6 @@
-﻿using UserManagement.Services.Domain.Interfaces;
+﻿using UserManagement.Data.DTO;
+using UserManagement.Models;
+using UserManagement.Services.Domain.Interfaces;
 
 namespace UserManagement.WebMS.Controllers;
 
@@ -15,5 +17,19 @@ public class UsersController : ControllerBase
         var items = _userService.GetAll();
 
         return Ok(items);
+    }
+
+    [HttpPost]
+    public IActionResult Create([FromBody] CreateUserDto newUser)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        // Call service to create user
+        var createdUser = _userService.Create(newUser);
+
+        return CreatedAtAction(nameof(List), new { id = createdUser.Id }, createdUser);
     }
 }

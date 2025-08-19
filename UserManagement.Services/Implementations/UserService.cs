@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UserManagement.Data;
+using UserManagement.Data.DTO;
 using UserManagement.Models;
 using UserManagement.Services.Domain.Interfaces;
 
@@ -22,4 +23,23 @@ public class UserService : IUserService
     }
 
     public IEnumerable<User> GetAll() => _dataAccess.GetAll<User>();
+
+    public User Create(CreateUserDto userDto)
+    {
+        if (userDto == null)
+            throw new ArgumentNullException(nameof(userDto));
+
+        var newUser = new User
+        {
+            Email = userDto.Email,
+            Surname = userDto.Surname,
+            Forename = userDto.Forename,
+            DateOfBirth = userDto.DateOfBirth,
+            IsActive = userDto.IsActive
+        };
+
+        _dataAccess.Create(newUser);        
+
+        return newUser;
+    }
 }
