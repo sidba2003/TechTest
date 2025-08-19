@@ -1,49 +1,112 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using UserManagement.Data;
+using UserManagement.Data.DTO;
 using UserManagement.Models;
 using UserManagement.Services.Domain.Implementations;
 
-namespace UserManagement.Data.Tests;
-
-public class UserServiceTests
+namespace UserManagement.Data.Tests
 {
-    [Fact]
-    public void GetAll_WhenContextReturnsEntities_MustReturnSameEntities()
+    public class UserServiceTests
     {
-        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
-        var service = CreateService();
-        var users = SetupUsers();
+        private readonly Mock<IDataContext> _dataContext = new();
+        private UserService CreateService() => new(_dataContext.Object);
 
-        // Act: Invokes the method under test with the arranged parameters.
-        var result = service.GetAll();
-
-        // Assert: Verifies that the action of the method under test behaves as expected.
-        result.Should().BeSameAs(users);
-    }
-
-    private IQueryable<User> SetupUsers(string forename = "Johnny", string surname = "User", string email = "juser@example.com", bool isActive = true, DateTime DateOfBirth = default(DateTime))
-    {
-        DateOfBirth = DateOfBirth.Date;
-
-        var users = new[]
+        [Fact]
+        public void GetAll_WhenContextReturnsEntities_MustReturnSameEntities()
         {
-            new User
+            // Arrange
+            var service = CreateService();
+            var users = SetupUsers();
+
+            // Act
+            var result = service.GetAll();
+
+            // Assert
+            result.Should().BeEquivalentTo(users);
+        }
+
+        [Fact]
+        public void Create_ValidUser_MustCallContextCreateAndReturnUser()
+        {
+            // Arrange
+            var service = CreateService();
+            var dto = new CreateUserDto
             {
-                Forename = forename,
-                Surname = surname,
-                Email = email,
-                IsActive = isActive,
-                DateOfBirth = DateOfBirth
-            }
-        }.AsQueryable();
+                Forename = "Alice",
+                Surname = "Test",
+                Email = "alice@test.com",
+                DateOfBirth = new DateTime(1995, 1, 1),
+                IsActive = true
+            };
 
-        _dataContext
-            .Setup(s => s.GetAll<User>())
-            .Returns(users);
+            User? capturedUser = null;
+            _dataContext
+                .Setup(d => d.Create(It.IsAny<User>()))
+                .Callback<User>(u => capturedUser = u);
 
-        return users;
+            // Act
+            var result = service.Create(dto);
+
+            // Assert
+            capturedUser.Should().NotBeNull();
+            capturedUser.Forename.Should().Be(dto.Forename);
+            capturedUser.Surname.Should().Be(dto.Surname);
+            capturedUser.Email.Should().Be(dto.Email);
+            capturedUser.DateOfBirth.Should().Be(dto.DateOfBirth);
+            capturedUser.IsActive.Should().Be(dto.IsActive);
+
+            result.Should().BeEquivalentTo(capturedUser);
+        }
+
+        [Fact]
+        public void Delete_ExistingUser_MustCallContextDelete()
+        {
+            // Arrange
+            var service = CreateService();
+            var users = SetupUsers();
+            var idToDelete = users.First().Id;
+
+            // Act
+            service.Delete(idToDelete);
+
+            // Assert
+            _dataContext.Verify(d => d.Delete(It.Is<User>(u => u.Id == idToDelete)), Times.Once);
+        }
+
+        [Fact]
+        public void Delete_NonExistingUser_ShouldThrowKeyNotFoundException()
+        {
+            // Arrange
+            var service = CreateService();
+            _dataContext.Setup(d => d.GetAll<User>()).Returns(new List<User>().AsQueryable());
+
+            // Act
+            Action act = () => service.Delete(999);
+
+            // Assert
+            act.Should().Throw<KeyNotFoundException>().WithMessage("User with Id 999 not found");
+        }
+
+        private IQueryable<User> SetupUsers()
+        {
+            var users = new List<User>
+            {
+                new User
+                {
+                    Id = 1,
+                    Forename = "Johnny",
+                    Surname = "User",
+                    Email = "juser@example.com",
+                    IsActive = true,
+                    DateOfBirth = new DateTime(1990, 1, 1)
+                }
+            }.AsQueryable();
+
+            _dataContext.Setup(d => d.GetAll<User>()).Returns(users);
+
+            return users;
+        }
     }
-
-    private readonly Mock<IDataContext> _dataContext = new();
-    private UserService CreateService() => new(_dataContext.Object);
 }

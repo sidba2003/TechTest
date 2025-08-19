@@ -9,39 +9,47 @@ public class DataContextTests
     [Fact]
     public void GetAll_WhenNewEntityAdded_MustIncludeNewEntity()
     {
-        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
-        var context = CreateContext();
-
+        // Arrange
+        using var context = CreateContext();
         var entity = new User
         {
             Forename = "Brand New",
             Surname = "User",
-            Email = "brandnewuser@example.com"
+            Email = "brandnewuser@example.com",
+            DateOfBirth = new System.DateTime(1990, 1, 1),
+            IsActive = true
         };
+
+        // Act
         context.Create(entity);
+        var result = context.GetAll<User>().ToList();
 
-        // Act: Invokes the method under test with the arranged parameters.
-        var result = context.GetAll<User>();
-
-        // Assert: Verifies that the action of the method under test behaves as expected.
-        result
-            .Should().Contain(s => s.Email == entity.Email)
-            .Which.Should().BeEquivalentTo(entity);
+        // Assert
+        result.Should().ContainSingle(u => u.Email == entity.Email)
+              .Which.Should().BeEquivalentTo(entity, options => options.Excluding(u => u.Id));
     }
 
     [Fact]
     public void GetAll_WhenDeleted_MustNotIncludeDeletedEntity()
     {
-        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
-        var context = CreateContext();
-        var entity = context.GetAll<User>().First();
+        // Arrange
+        using var context = CreateContext();
+        var entity = new User
+        {
+            Forename = "ToDelete",
+            Surname = "User",
+            Email = "todelete@example.com",
+            DateOfBirth = new System.DateTime(1990, 1, 1),
+            IsActive = true
+        };
+        context.Create(entity);
+
+        // Act
         context.Delete(entity);
+        var result = context.GetAll<User>().ToList();
 
-        // Act: Invokes the method under test with the arranged parameters.
-        var result = context.GetAll<User>();
-
-        // Assert: Verifies that the action of the method under test behaves as expected.
-        result.Should().NotContain(s => s.Email == entity.Email);
+        // Assert
+        result.Should().NotContain(u => u.Email == entity.Email);
     }
 
     private DataContext CreateContext() => new();
