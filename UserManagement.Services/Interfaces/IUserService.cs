@@ -14,4 +14,5 @@ public interface IUserService
     IEnumerable<User> FilterByActive(bool isActive);
     IEnumerable<User> GetAll();
     User Create(CreateUserDto userDto);
+    void Delete(long id);
 }

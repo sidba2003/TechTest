@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UserManagement.Data;
 using UserManagement.Data.DTO;
 using UserManagement.Models;
@@ -41,5 +42,13 @@ public class UserService : IUserService
         _dataAccess.Create(newUser);        
 
         return newUser;
+    }
+
+    public void Delete(long id)
+    {
+        var user = _dataAccess.GetAll<User>().FirstOrDefault(u => u.Id == id);
+        if (user == null) throw new KeyNotFoundException($"User with Id {id} not found");
+
+        _dataAccess.Delete(user);
     }
 }

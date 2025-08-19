@@ -35,7 +35,8 @@ export default function UsersDisplayComponent() {
                             })
                             .map(data => (
                                 <UserDataComponent 
-                                    {...data} 
+                                    {...data}
+                                    setUsers={setUsers}
                                 />
                             ))
     
@@ -70,6 +71,7 @@ export default function UsersDisplayComponent() {
                 <span className="table-header-class">Forename</span>
                 <span className="table-header-class">Date of Birth</span>
                 <span className="table-header-class">isActive</span>
+                <span className="table-header-class">Options</span>
                 {userDataDisplay}
             </div>
         </>

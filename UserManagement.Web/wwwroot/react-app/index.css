@@ -23,7 +23,7 @@ html, body {
 
 .user-data-grid-class {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     column-gap: 20px;
     row-gap: 15px;
 
@@ -180,4 +180,25 @@ html, body {
 .submit-button:active {
     opacity: 0.50;
     box-shadow: 8px 8px 11px rgb(29, 70, 27);
+}
+
+.user-options-class {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.delete-option-class {
+    font-size: medium;
+    padding: 5px;
+    background-color: rgb(211, 95, 95);
+    text-align: center;
+}
+
+.delete-option-class:hover {
+    opacity: .75;
+}
+
+.delete-option-class:active{
+    opacity: 0.5;
 }

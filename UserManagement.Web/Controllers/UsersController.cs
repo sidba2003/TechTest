@@ -32,4 +32,18 @@ public class UsersController : ControllerBase
 
         return CreatedAtAction(nameof(List), new { id = createdUser.Id }, createdUser);
     }
+
+    [HttpDelete("{id}")]
+    public IActionResult Delete(long id)
+    {
+        try
+        {
+            _userService.Delete(id);
+            return NoContent(); // HTTP 204 – standard for successful DELETE
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(); // HTTP 404 if user does not exist
+        }
+    }
 }
