@@ -1,4 +1,15 @@
+import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setSelectedUser } from "../../store";
+
 export default function UserDataComponent(props){
+    const dispatch = useDispatch();
+
+    const handleClick = () => {
+        dispatch(setSelectedUser(props));
+        console.log("dispatchdone!!")
+    };
+
     async function deleteUser(id){
         try {
             const response = await fetch(`/api/users/${id}`, {
@@ -9,7 +20,7 @@ export default function UserDataComponent(props){
 
             // delete the user from the list
             props.setUsers(users => users.filter(
-                    user => user.id != id
+                    user => user.id !== id
                 )
             );
 
@@ -35,6 +46,7 @@ export default function UserDataComponent(props){
                     Edit
                 </button>
             </div>
+            <Link onClick={handleClick} to='view'>History</Link>
         </>
     )
 }

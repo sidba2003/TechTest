@@ -55,7 +55,7 @@ export default function UsersDisplayComponent() {
     }
 
     return (
-        <>
+        <div className="main-content-class">
             <div className="user-options-class">
                 <UserActiveFilterComponent
                     displayActive={setDisplayIsActiveTrue}
@@ -90,8 +90,9 @@ export default function UsersDisplayComponent() {
                 <span className="table-header-class">Date of Birth</span>
                 <span className="table-header-class">isActive</span>
                 <span className="table-header-class">Options</span>
+                <span className="table-header-class">User Data</span>
                 {userDataDisplay}
             </div>
-        </>
+        </div>
     )
 }

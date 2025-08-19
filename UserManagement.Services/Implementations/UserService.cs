@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using UserManagement.Data;
 using UserManagement.Data.DTO;
 using UserManagement.Models;
@@ -39,7 +40,9 @@ public class UserService : IUserService
             IsActive = userDto.IsActive
         };
 
-        _dataAccess.Create(newUser);        
+        _dataAccess.Create(newUser);
+
+        LogAudit(newUser, "CREATE", null, JsonSerializer.Serialize(newUser));
 
         return newUser;
     }
@@ -48,6 +51,8 @@ public class UserService : IUserService
     {
         var user = _dataAccess.GetAll<User>().FirstOrDefault(u => u.Id == id);
         if (user == null) throw new KeyNotFoundException($"User with Id {id} not found");
+
+        LogAudit(user, "DELETE", JsonSerializer.Serialize(user), null);
 
         _dataAccess.Delete(user);
     }
@@ -61,6 +66,8 @@ public class UserService : IUserService
         if (existingUser == null)
             throw new KeyNotFoundException($"User with Id {id} not found");
 
+        var dataBefore = JsonSerializer.Serialize(existingUser);
+
         // Update fields
         existingUser.Email = userDto.Email;
         existingUser.Surname = userDto.Surname;
@@ -69,6 +76,29 @@ public class UserService : IUserService
         existingUser.IsActive = userDto.IsActive;
 
         _dataAccess.Update(existingUser);  // assuming IDataContext has Update
+
+        var dataAfter = JsonSerializer.Serialize(existingUser);
+
+        LogAudit(
+            existingUser,
+            "UPDATE",
+            JsonSerializer.Serialize(dataBefore),
+            JsonSerializer.Serialize(dataAfter)
+        );
+
         return existingUser;
+    }
+
+    private void LogAudit(User user, string operation, string? dataBefore, string? dataAfter)
+    {
+        var audit = new UserAudit
+        {
+            UserId = user.Id,
+            Operation = operation,
+            DataBefore = dataBefore,
+            DataAfter = dataAfter
+        };
+
+        _dataAccess.Create(audit);
     }
 }

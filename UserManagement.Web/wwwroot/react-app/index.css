@@ -23,7 +23,7 @@ html, body {
 
 .user-data-grid-class {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(7, 1fr);
     column-gap: 20px;
     row-gap: 15px;
 
