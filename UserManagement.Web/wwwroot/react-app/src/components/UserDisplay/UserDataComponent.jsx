@@ -1,8 +1,4 @@
 export default function UserDataComponent(props){
-    function printporps(){
-        console.log("props are", props);
-    }
-
     async function deleteUser(id){
         try {
             const response = await fetch(`/api/users/${id}`, {
@@ -26,7 +22,6 @@ export default function UserDataComponent(props){
     // id can be accessed using props.id.toString() (not sure about toString())
     return (
         <>
-            {printporps()}
             <span className="user-email">{props.email}</span>
             <span className="user-surname">{props.surname}</span>
             <span className="user-forname">{props.forename}</span>
@@ -35,6 +30,9 @@ export default function UserDataComponent(props){
             <div className="user-options-class">
                 <button onClick={() => deleteUser(props.id)} className="delete-option-class">
                     Delete
+                </button>
+                <button onClick={() => props.enableEditPopup(props.id)} className="edit-option-class">
+                    Edit
                 </button>
             </div>
         </>

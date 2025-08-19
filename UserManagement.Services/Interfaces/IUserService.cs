@@ -15,4 +15,5 @@ public interface IUserService
     IEnumerable<User> GetAll();
     User Create(CreateUserDto userDto);
     void Delete(long id);
+    User Update(long id, UpdateUserDto userDto);
 }

@@ -1,4 +1,4 @@
-﻿import UsersDisplayComponent from './components/UsersDisplayComponent.jsx';
+﻿import UsersDisplayComponent from './components/UserDisplay/UsersDisplayComponent.jsx';
 
 export default function App() {
 

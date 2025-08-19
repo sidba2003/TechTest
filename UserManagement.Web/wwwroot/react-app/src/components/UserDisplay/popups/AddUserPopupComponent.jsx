@@ -4,17 +4,12 @@ export default function AddUserPopupComponent(props) {
     const [selectedDate, setSelectedDate] = useState(null);
 
     async function handleFormSubmission(e) {
-        e.preventDefault(); // stop page refresh
-
+        e.preventDefault();
         const formData = new FormData(e.target);
 
-        // Convert FormData into a JS object
         const data = Object.fromEntries(formData.entries());
 
-        // Convert checkbox string ("on") to boolean
         data.isActive = formData.get("isActive") === "on";
-
-        // Make sure date is stored from state
         data.dateOfBirth = selectedDate;
 
         console.log("Submitting:", data);
@@ -32,17 +27,14 @@ export default function AddUserPopupComponent(props) {
 
         const result = await response.json();
 
-        // Add the new user to your list
         props.setUsers(prevUsers => [...prevUsers, result]);
 
         // Close the popup
         props.togglePopup(false);
 
         console.log("Saved user:", result);
-
-        props.togglePopup(false);
         } catch (err) {
-        console.error("Error saving user:", err);
+            console.error("Error saving user:", err);
         }
     }
 

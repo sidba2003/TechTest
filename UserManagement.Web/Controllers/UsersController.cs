@@ -46,4 +46,23 @@ public class UsersController : ControllerBase
             return NotFound(); // HTTP 404 if user does not exist
         }
     }
+
+    [HttpPut("{id}")]
+    public IActionResult Update(long id, [FromBody] UpdateUserDto userDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        try
+        {
+            var updatedUser = _userService.Update(id, userDto);
+            return Ok(updatedUser);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
+    }
 }

@@ -51,4 +51,24 @@ public class UserService : IUserService
 
         _dataAccess.Delete(user);
     }
+
+    public User Update(long id, UpdateUserDto userDto)
+    {
+        if (userDto == null)
+            throw new ArgumentNullException(nameof(userDto));
+
+        var existingUser = _dataAccess.GetAll<User>().FirstOrDefault(u => u.Id == id);
+        if (existingUser == null)
+            throw new KeyNotFoundException($"User with Id {id} not found");
+
+        // Update fields
+        existingUser.Email = userDto.Email;
+        existingUser.Surname = userDto.Surname;
+        existingUser.Forename = userDto.Forename;
+        existingUser.DateOfBirth = userDto.DateOfBirth;
+        existingUser.IsActive = userDto.IsActive;
+
+        _dataAccess.Update(existingUser);  // assuming IDataContext has Update
+        return existingUser;
+    }
 }

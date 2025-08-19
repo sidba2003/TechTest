@@ -202,3 +202,18 @@ html, body {
 .delete-option-class:active{
     opacity: 0.5;
 }
+
+.edit-option-class {
+    font-size: medium;
+    padding: 5px;
+    background-color: rgb(118, 192, 108);
+    text-align: center;
+}
+
+.edit-option-class:hover {
+    opacity: .75;
+}
+
+.edit-option-class:active{
+    opacity: 0.5;
+}

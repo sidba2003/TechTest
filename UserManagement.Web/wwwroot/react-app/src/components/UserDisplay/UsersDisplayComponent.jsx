@@ -1,12 +1,15 @@
 import UserDataComponent from './UserDataComponent.jsx';
 import UserActiveFilterComponent from './UserActiveFilterComponent.jsx';
-import AddUserPopupComponent from './AddUserPopupComponent.jsx';
+import AddUserPopupComponent from './popups/AddUserPopupComponent.jsx';
+import EditUserPopupComponent from './popups/EditUserPopupComponent.jsx';
 import { useState, useEffect } from 'react';
 
 export default function UsersDisplayComponent() {
     const [displayIsActiveTrue, setDisplayIsActiveTrue] = useState(true);
     const [displayIsActiveFalse, setDisplayIsActiveFalse] = useState(true);
     const [displayAddUserPopup, setDisplayAddUserPopup] = useState(false);
+    const [displayEditUserPopup, setDisplayEditUserPopup] = useState(false);
+    const [editUserPopupId, setEditUserPopupId] = useState(-1);
     const [users, setUsers] = useState([]);
 
     useEffect(
@@ -27,6 +30,12 @@ export default function UsersDisplayComponent() {
         }, []
     );
 
+    function showEditUserPopupWithId(id){
+        console.log("just tried to edit the user", {...users.filter(user => user.id === id)[0]});
+        setEditUserPopupId(id);
+        setDisplayEditUserPopup(prev => !prev);
+    }
+
     const userDataDisplay = users
                             .filter(data => {
                                 return (
@@ -37,6 +46,7 @@ export default function UsersDisplayComponent() {
                                 <UserDataComponent 
                                     {...data}
                                     setUsers={setUsers}
+                                    enableEditPopup={showEditUserPopupWithId}
                                 />
                             ))
     
@@ -64,6 +74,14 @@ export default function UsersDisplayComponent() {
             </div>
 
             {displayAddUserPopup ? <AddUserPopupComponent setUsers={setUsers} togglePopup={setDisplayAddUserPopup}/> : null}
+
+            {displayEditUserPopup ? 
+                <EditUserPopupComponent 
+                    {...users.filter(user => user.id === editUserPopupId)[0]}
+                    togglePopup={setDisplayEditUserPopup}
+                    setUsers={setUsers}
+                /> : null
+            }
 
             <div className="user-data-grid-class">
                 <span className="table-header-class">Email</span>
