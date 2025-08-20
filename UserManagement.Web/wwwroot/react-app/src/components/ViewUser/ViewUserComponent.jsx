@@ -47,7 +47,7 @@ export default function ViewUserComponent() {
             
             <div className="operations-header-class">Previous Operations</div>
             <div className="user-operations-class">
-                { userOperationsList }
+                { userOperationsList.length > 0 ? userOperationsList : <span>User with id {userData.id} does not have any associated operations to show!</span> }
             </div>
         </div>
     );
