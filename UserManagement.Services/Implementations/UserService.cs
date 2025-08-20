@@ -82,8 +82,8 @@ public class UserService : IUserService
         LogAudit(
             existingUser,
             "UPDATE",
-            JsonSerializer.Serialize(dataBefore),
-            JsonSerializer.Serialize(dataAfter)
+            dataBefore,
+            dataAfter
         );
 
         return existingUser;

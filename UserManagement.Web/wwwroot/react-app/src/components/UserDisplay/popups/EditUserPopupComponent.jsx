@@ -3,6 +3,17 @@ import { useState } from "react";
 export default function EditUserPopupComponent(props){
     const [selectedDate, setSelectedDate] = useState(props.dateOfBirth.split("T")[0]);
 
+    function checkValuesChanged(data){
+        if (data.isActive === props.isActive &&
+            data.dateOfBirth === props.dateOfBirth.split("T")[0] &&
+            data.email === props.email &&
+            data.forename === props.forename &&
+            data.surname === props.surname
+        ) return false
+
+        return true
+    }
+
     async function handleFormSubmission(e){
         e.preventDefault();
         
@@ -11,6 +22,17 @@ export default function EditUserPopupComponent(props){
 
         data.isActive = formData.get("isActive") === "on";
         data.dateOfBirth = selectedDate;
+
+        console.log("props are", props)
+        console.log("form data is", data)
+        
+        // checks if one or more values have been changed to before sending the PUT request
+        // avoids unecessary logs in the backend
+        const valuesChanged = checkValuesChanged(data);
+        if (!valuesChanged) {
+            alert("Change one or more values to submit the updated data");
+            return;
+        }
 
         try {
             const response = await fetch(`/api/users/${props.id}`, {

@@ -7,7 +7,6 @@ export default function UserDataComponent(props){
 
     const handleClick = () => {
         dispatch(setSelectedUser(props));
-        console.log("dispatchdone!!")
     };
 
     async function deleteUser(id){
@@ -46,7 +45,7 @@ export default function UserDataComponent(props){
                     Edit
                 </button>
             </div>
-            <Link onClick={handleClick} to='view'>History</Link>
+            <Link onClick={handleClick} to='view'><div className="user-history-class"><div className="user-history-text"><span>History</span></div></div></Link>
         </>
     )
 }

@@ -15,17 +15,13 @@ namespace UserManagement.WebMS.Controllers
             _auditService = auditService;
         }
 
-        /// <summary>
-        /// Get all audit logs for a specific user by userId.
-        /// </summary>
-        /// <param name="userId">The ID of the user to fetch audits for</param>
         [HttpGet("{userId}")]
         public IActionResult GetAuditsByUserId(long userId)
         {
             var audits = _auditService.GetAuditsForUser(userId);
 
             if (audits == null || !audits.Any())
-                return NotFound($"No audit logs found for user with ID {userId}.");
+                return Ok(new object[0]);
 
             return Ok(audits);
         }

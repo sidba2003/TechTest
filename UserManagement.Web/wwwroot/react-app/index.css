@@ -217,3 +217,94 @@ html, body {
 .edit-option-class:active{
     opacity: 0.5;
 }
+
+.user-history-class {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 5px;
+    background-color: rgb(76, 153, 153);
+}
+
+.user-history-text > span {
+    color: black;
+    font-size: medium;
+}
+
+.user-history-text > span:visited {
+    color: black;
+    font-size: medium;
+
+    text-decoration: none;
+}
+
+.user-history-class:hover {
+    opacity: 0.75;
+}
+
+.user-history-class:active {
+    opacity: 0.5;
+}
+
+.user-data-main-class {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+
+    background-color: rgb(224, 196, 102);
+
+    padding: 25px;
+}
+
+.user-data-header-class {
+    margin-bottom: 20px;
+
+    font-size: xx-large;
+    color: black;
+
+    font-weight: bold;
+}
+
+.user-info-class > span {
+    margin: 8px;
+}
+
+.user-info-class {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    padding: 5px;
+
+    color: black;
+    font-size: x-large;
+
+    margin-bottom: 10px;
+
+    background-color: rgb(218, 200, 144);
+}
+
+.operations-header-class {
+    font-size: xx-large;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.user-operations-class {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-operation-class {
+    display: flex;
+    flex-direction: column;
+
+    background-color: rgb(218, 200, 144);
+
+    margin: 4px;
+}
