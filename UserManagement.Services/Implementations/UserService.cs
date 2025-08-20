@@ -91,7 +91,7 @@ public class UserService : IUserService
 
     private void LogAudit(User user, string operation, string? dataBefore, string? dataAfter)
     {
-        var audit = new UserAudit
+        var audit = new UserLogs
         {
             UserId = user.Id,
             Operation = operation,

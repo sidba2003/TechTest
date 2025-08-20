@@ -1,6 +1,6 @@
 ﻿import UsersDisplayComponent from './components/UserDisplay/UsersDisplayComponent.jsx';
 import ViewUserComponent from './components/ViewUser/ViewUserComponent.jsx';
-import ViewLogsComponent from './components/ViewLogsComponent.jsx';
+import ViewLogsComponent from './components/LogsDisplay/ViewLogsComponent.jsx';
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom';
 import RootLayout from './layouts/RootLayout.jsx'; 
 

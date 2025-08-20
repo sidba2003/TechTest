@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux";
 import { useState, useEffect } from 'react';
-import UserOperationComponent from "./UserOperationComponent.jsx";
+import LogComponent from "../../misc/LogComponent.jsx";
 
 export default function ViewUserComponent() {
     const [userHistory, setUserHistory] = useState([]);
@@ -29,7 +29,7 @@ export default function ViewUserComponent() {
     }, []);
 
     const userOperationsList = userHistory.map(item => (
-        <UserOperationComponent {...item} />
+        <LogComponent {...item} />
     ))
 
     return (

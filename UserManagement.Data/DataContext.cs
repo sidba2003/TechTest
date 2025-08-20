@@ -8,7 +8,7 @@ public class DataContext : DbContext, IDataContext
 {
     public DataContext() => Database.EnsureCreated();
 
-    public DbSet<UserAudit>? UserAudits { get; set; }
+    public DbSet<UserLogs>? UserAudits { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
         => options.UseInMemoryDatabase("UserManagement.Data.DataContext");

@@ -1,16 +1,17 @@
 ﻿using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using UserManagement.Services.Domain.Implementations;
 using UserManagement.Services.Domain.Interfaces;
 
 namespace UserManagement.WebMS.Controllers
 {
     [ApiController]
     [Route("api/user-audits")]
-    public class UserAuditController : ControllerBase
+    public class UserLogsController : ControllerBase
     {
-        private readonly IUserAuditService _auditService;
+        private readonly IUserLogsService _auditService;
 
-        public UserAuditController(IUserAuditService auditService)
+        public UserLogsController(IUserLogsService auditService)
         {
             _auditService = auditService;
         }
@@ -24,6 +25,14 @@ namespace UserManagement.WebMS.Controllers
                 return Ok(new object[0]);
 
             return Ok(audits);
+        }
+
+        [HttpGet]
+        public IActionResult List()
+        {
+            var items = _auditService.GetAll();
+
+            return Ok(items);
         }
     }
 }

@@ -307,4 +307,16 @@ html, body {
     background-color: rgb(218, 200, 144);
 
     margin: 4px;
+
+    border: solid;
+    border-width: 1.5px;
+    border-color: rgb(59, 59, 59);
+}
+
+.user-operation-button-class:hover {
+    opacity: 0.6;
+}
+
+.user-operation-button-class:active {
+    opacity: 0.4;
 }

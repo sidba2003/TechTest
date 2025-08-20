@@ -1,7 +1,7 @@
 import OldNewDataDisplayComponent from "./OldNewDataDisplayComponent.jsx"
 import { useState } from "react"
 
-export default function UserOperationComponent(props){
+export default function LogComponent(props){
     const [displayData, setDisplayData] = useState(false);
 
     const styles = {
@@ -13,7 +13,7 @@ export default function UserOperationComponent(props){
             <span>OPERATION: {props.operation}</span>
             <span>TIME (IN UTC): {props.timestamp}</span>
 
-            <button style={styles} onClick={() => setDisplayData(prev => !prev)}>
+            <button style={styles} onClick={() => setDisplayData(prev => !prev)} className="user-operation-button-class">
                 {!displayData ? "Show Data" : "Hide Data"}
             </button>
 
