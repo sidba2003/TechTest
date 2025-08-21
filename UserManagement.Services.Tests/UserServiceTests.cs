@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using UserManagement.Data;
 using UserManagement.Data.DTO;
 using UserManagement.Models;
 using UserManagement.Services.Domain.Implementations;
@@ -16,7 +15,7 @@ namespace UserManagement.Data.Tests
         private static DataContext NewCleanContext()
         {
             var options = new DbContextOptionsBuilder<DataContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString()) // unique per test
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options;
 
             return new DataContext(options);
@@ -124,7 +123,6 @@ namespace UserManagement.Data.Tests
             // user gone
             (await context.Users!.AnyAsync(u => u.Id == created.Id)).Should().BeFalse();
 
-            // specifically fetch the DELETE audit (there’s also a CREATE audit)
             var audit = await context.UserAudits!
                 .SingleAsync(a => a.UserId == created.Id && a.Operation == "DELETE");
 
