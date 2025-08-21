@@ -93,11 +93,12 @@ export default function EditUserPopupComponent(props){
             <label>
                 Date of Birth
                 <input
-                type="date"
-                defaultValue={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                required
-                name="dateOfBirth"
+                    type="date"
+                    defaultValue={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    required
+                    name="dateOfBirth"
+                    max={new Date().toISOString().split("T")[0]}
                 />
             </label>
             <label>

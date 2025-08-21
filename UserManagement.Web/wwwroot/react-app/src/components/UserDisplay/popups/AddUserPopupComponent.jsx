@@ -68,11 +68,12 @@ export default function AddUserPopupComponent(props) {
             <label>
                 Date of Birth
                 <input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                required
-                name="dateOfBirth"
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    required
+                    name="dateOfBirth"
+                    max={new Date().toISOString().split("T")[0]}
                 />
             </label>
             <label>

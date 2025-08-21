@@ -37,7 +37,7 @@ export default function UserDataComponent(props){
             <span className="user-forname">{props.forename}</span>
             <span className="user-dateOfBirth">{props.dateOfBirth.split("T")[0]}</span>
             <span className="user-isActive">{props.isActive.toString()}</span>
-            <div className="user-options-class">
+            <div className="user-option-class">
                 <button onClick={() => deleteUser(props.id)} className="delete-option-class">
                     Delete
                 </button>

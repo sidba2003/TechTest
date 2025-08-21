@@ -10,11 +10,11 @@ export default function LogComponent(props){
 
     return (
         <div className="user-operation-class">
-            <span>OPERATION: {props.operation}</span>
-            <span>TIME (IN UTC): {props.timestamp}</span>
+            <span><strong>OPERATION:</strong> {props.operation}</span>
+            <span><strong>TIME (IN UTC):</strong> {props.timestamp}</span>
 
             <button style={styles} onClick={() => setDisplayData(prev => !prev)} className="user-operation-button-class">
-                {!displayData ? "Show Data" : "Hide Data"}
+                {!displayData ? "Click Here to See Additional Data" : "Hide Data"}
             </button>
 
             {displayData && <OldNewDataDisplayComponent

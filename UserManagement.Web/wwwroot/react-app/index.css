@@ -49,7 +49,7 @@ html, body {
 
 .user-options-class {
     display: flex;
-    justify-content: left;
+    justify-content: space-between;
     align-items: center;
 
     width: 100%;
@@ -180,12 +180,6 @@ html, body {
 .submit-button:active {
     opacity: 0.50;
     box-shadow: 8px 8px 11px rgb(29, 70, 27);
-}
-
-.user-options-class {
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 .delete-option-class {
@@ -319,4 +313,27 @@ html, body {
 
 .user-operation-button-class:active {
     opacity: 0.4;
+}
+
+.goto-link-button-class {
+    padding: 4px;
+    font-size: large;
+    font-weight: bold;
+    border-radius: 8px;
+    background-color: rgb(149, 187, 106);
+    margin: 7px;
+}
+
+.goto-link-button-class:hover {
+    opacity: 0.6;
+}
+
+.goto-link-button-class:active {
+    opacity: 0.35;
+}
+
+.user-option-class {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

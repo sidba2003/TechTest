@@ -2,6 +2,7 @@ import UserDataComponent from './UserDataComponent.jsx';
 import UserActiveFilterComponent from './UserActiveFilterComponent.jsx';
 import AddUserPopupComponent from './popups/AddUserPopupComponent.jsx';
 import EditUserPopupComponent from './popups/EditUserPopupComponent.jsx';
+import LinkButtonComponent from '../../misc/LinkButtonComponent.jsx';
 import { useState, useEffect } from 'react';
 
 export default function UsersDisplayComponent() {
@@ -62,6 +63,11 @@ export default function UsersDisplayComponent() {
                     displayInactive={setDisplayIsActiveFalse}
                     showActiveUsers={displayIsActiveTrue}
                     showInactiveUsers={displayIsActiveFalse}
+                />
+
+                <LinkButtonComponent
+                    pageLink="/logs"
+                    buttonText="View All Application Logs"
                 />
 
                 <button 

@@ -1,6 +1,7 @@
 import { useSelector } from "react-redux";
 import { useState, useEffect } from 'react';
 import LogComponent from "../../misc/LogComponent.jsx";
+import LinkButtonComponent from "../../misc/LinkButtonComponent.jsx";
 
 export default function ViewUserComponent() {
     const [userHistory, setUserHistory] = useState([]);
@@ -34,6 +35,7 @@ export default function ViewUserComponent() {
 
     return (
         <div className="user-data-main-class">
+            <LinkButtonComponent pageLink="/logs" buttonText="View All Application Logs" />
             <div className="user-data-header-class">
                 User Information
             </div>
