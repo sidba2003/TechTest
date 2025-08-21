@@ -1,8 +1,10 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using UserManagement.Models;
+using Xunit;
 
 namespace UserManagement.Data.Tests
 {
@@ -134,6 +136,7 @@ namespace UserManagement.Data.Tests
             };
             await context.CreateAsync(log);
 
+            // sanity: log exists
             (await context.GetAll<UserLogs>().AnyAsync(l => l.Id == log.Id)).Should().BeTrue();
 
             // Act
@@ -146,14 +149,15 @@ namespace UserManagement.Data.Tests
             logs.Should().NotContain(l => l.Id == log.Id);
         }
 
+        // Removed CreateContext(); always use an isolated database per test
         private static DataContext CreateIsolatedContext(bool ensureCreated = true)
         {
             var options = new DbContextOptionsBuilder<DataContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString()) 
+                .UseInMemoryDatabase(Guid.NewGuid().ToString()) // unique DB per test
                 .Options;
 
             var ctx = new DataContext(options);
-            if (ensureCreated) ctx.Database.EnsureCreated();
+            if (ensureCreated) ctx.Database.EnsureCreated(); // apply seeding when desired
             return ctx;
         }
     }
