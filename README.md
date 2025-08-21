@@ -4,7 +4,7 @@ Please go through this section to understand a bit more about the work I have do
 
 ## Sections Completed
 
-I have completed all the tasks within the **Standard** and the **Advanced** sections, along with two tasks of the **Expert** section.
+I have completed all the tasks within the **Standard** and the **Advanced** sections, along with two tasks of the **Expert** section. And I have also converted everything to async.
 
 The two tasks I have done as part of the **Expert** section are:
 
