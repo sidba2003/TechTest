@@ -48,6 +48,8 @@ export default function UsersDisplayComponent() {
                                     {...data}
                                     setUsers={setUsers}
                                     enableEditPopup={showEditUserPopupWithId}
+                                    setDisplayEditUserPopup={setDisplayEditUserPopup}
+                                    setEditUserPopupId={setEditUserPopupId}
                                 />
                             ))
     

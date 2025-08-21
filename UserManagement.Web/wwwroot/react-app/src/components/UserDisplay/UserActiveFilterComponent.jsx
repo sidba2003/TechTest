@@ -1,7 +1,7 @@
 export default function UserActiveFilterComponent(props) {
     return (
         <>
-            <div className="filter-active-class filter-class">
+            <div className="filter-class">
                 <label>
                     <input
                         type="checkbox"
@@ -11,7 +11,7 @@ export default function UserActiveFilterComponent(props) {
                     Show Active Users
                 </label>
             </div>
-            <div className="filter-inactive-class filter-class">
+            <div className="filter-class">
                 <label>
                     <input
                         type="checkbox"

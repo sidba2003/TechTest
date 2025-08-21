@@ -25,10 +25,6 @@ export default function ViewLogsComponent() {
             }, []
     );
 
-    const operationsList = logs.map(item => (
-        <LogComponent {...item} />
-    ))
-
 
     return (
         <div className="user-data-main-class">
@@ -37,7 +33,7 @@ export default function ViewLogsComponent() {
             </div>
 
             <div className="user-operations-class">
-                { operationsList.length > 0 ? operationsList : <span>No logs have been logged into the app so far!</span> }
+                { logs.length > 0 ? <LogComponent operations={logs} /> : <span>No logs have been logged into the app so far!</span> }
             </div>
         </div>
     );

@@ -1,26 +1,32 @@
-import OldNewDataDisplayComponent from "./OldNewDataDisplayComponent.jsx"
-import { useState } from "react"
+import LogComponentDisplay from "./LogComponentDisplay.jsx"
+import OperationFilters from './OperationFilters.jsx';
+import { useState } from 'react';
 
 export default function LogComponent(props){
-    const [displayData, setDisplayData] = useState(false);
+    console.log("props are", props);
+    const [showCreate, setShowCreate] = useState(true);
+    const [showUpdate, setShowUpdate] = useState(true);
+    const [showDelete, setShowDelete] = useState(true);
 
-    const styles = {
-        backgroundColor: displayData ? "#c44c4cff" : "#6ec44cff"
-    }
+    const userOperationsList = props.operations.filter(item => (
+        (showCreate && item.operation === "CREATE") || (showUpdate && item.operation === "UPDATE") || (showDelete && item.operation === "DELETE")
+    )).map(item => (
+        <LogComponentDisplay {...item} />
+    ));
 
     return (
         <div className="user-operation-class">
-            <span><strong>OPERATION:</strong> {props.operation}</span>
-            <span><strong>TIME (IN UTC):</strong> {props.timestamp}</span>
+            <OperationFilters
+                showCreate={showCreate}
+                setShowCreate={setShowCreate}
 
-            <button style={styles} onClick={() => setDisplayData(prev => !prev)} className="user-operation-button-class">
-                {!displayData ? "Click Here to See Additional Data" : "Hide Data"}
-            </button>
+                showUpdate={showUpdate}
+                setShowUpdate={setShowUpdate}
 
-            {displayData && <OldNewDataDisplayComponent
-                oldData={props.dataBefore}
-                newData={props.dataAfter}
-            />}
+                showDelete={showDelete}
+                setShowDelete={setShowDelete}
+            />
+            {userOperationsList}
         </div>
     )
 }

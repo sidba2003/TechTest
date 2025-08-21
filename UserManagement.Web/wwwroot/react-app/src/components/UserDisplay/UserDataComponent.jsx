@@ -10,6 +10,11 @@ export default function UserDataComponent(props){
     };
 
     async function deleteUser(id){
+        // toggling the edit popup off and resetting the edit user id
+        // this helps with an edge case if a user whose edit popup is enabled is tried to be deleted
+        props.setDisplayEditUserPopup(false);
+        props.setEditUserPopupId(-1);
+
         try {
             const response = await fetch(`/api/users/${id}`, {
                 method: "DELETE",
