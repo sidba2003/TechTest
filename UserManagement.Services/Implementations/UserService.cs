@@ -2,103 +2,90 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using UserManagement.Data;
 using UserManagement.Data.DTO;
 using UserManagement.Models;
 using UserManagement.Services.Domain.Interfaces;
 
-namespace UserManagement.Services.Domain.Implementations;
-
-public class UserService : IUserService
+namespace UserManagement.Services.Domain.Implementations
 {
-    private readonly IDataContext _dataAccess;
-    public UserService(IDataContext dataAccess) => _dataAccess = dataAccess;
-
-    /// <summary>
-    /// Return users by active state
-    /// </summary>
-    /// <param name="isActive"></param>
-    /// <returns></returns>
-    public IEnumerable<User> FilterByActive(bool isActive)
+    public class UserService : IUserService
     {
-        throw new NotImplementedException();
-    }
+        private readonly IDataContext _dataAccess;
+        public UserService(IDataContext dataAccess) => _dataAccess = dataAccess;
 
-    public IEnumerable<User> GetAll() => _dataAccess.GetAll<User>();
+        public async Task<IEnumerable<User>> FilterByActiveAsync(bool isActive)
+            => await _dataAccess.GetAll<User>().Where(u => u.IsActive == isActive).ToListAsync();
 
-    public User Create(CreateUserDto userDto)
-    {
-        if (userDto == null)
-            throw new ArgumentNullException(nameof(userDto));
+        public async Task<IEnumerable<User>> GetAllAsync()
+            => await _dataAccess.GetAll<User>().ToListAsync();
 
-        var newUser = new User
+        public async Task<User> CreateAsync(CreateUserDto userDto)
         {
-            Email = userDto.Email,
-            Surname = userDto.Surname,
-            Forename = userDto.Forename,
-            DateOfBirth = userDto.DateOfBirth,
-            IsActive = userDto.IsActive
-        };
+            if (userDto == null) throw new ArgumentNullException(nameof(userDto));
 
-        _dataAccess.Create(newUser);
+            var newUser = new User
+            {
+                Email = userDto.Email,
+                Surname = userDto.Surname,
+                Forename = userDto.Forename,
+                DateOfBirth = userDto.DateOfBirth,
+                IsActive = userDto.IsActive
+            };
 
-        LogAudit(newUser, "CREATE", null, JsonSerializer.Serialize(newUser));
+            await _dataAccess.CreateAsync(newUser);
 
-        return newUser;
-    }
+            await LogAuditAsync(newUser, "CREATE", null, JsonSerializer.Serialize(newUser));
 
-    public void Delete(long id)
-    {
-        var user = _dataAccess.GetAll<User>().FirstOrDefault(u => u.Id == id);
-        if (user == null) throw new KeyNotFoundException($"User with Id {id} not found");
+            return newUser;
+        }
 
-        LogAudit(user, "DELETE", JsonSerializer.Serialize(user), null);
-
-        _dataAccess.Delete(user);
-    }
-
-    public User Update(long id, UpdateUserDto userDto)
-    {
-        if (userDto == null)
-            throw new ArgumentNullException(nameof(userDto));
-
-        var existingUser = _dataAccess.GetAll<User>().FirstOrDefault(u => u.Id == id);
-        if (existingUser == null)
-            throw new KeyNotFoundException($"User with Id {id} not found");
-
-        var dataBefore = JsonSerializer.Serialize(existingUser);
-
-        // Update fields
-        existingUser.Email = userDto.Email;
-        existingUser.Surname = userDto.Surname;
-        existingUser.Forename = userDto.Forename;
-        existingUser.DateOfBirth = userDto.DateOfBirth;
-        existingUser.IsActive = userDto.IsActive;
-
-        _dataAccess.Update(existingUser);  // assuming IDataContext has Update
-
-        var dataAfter = JsonSerializer.Serialize(existingUser);
-
-        LogAudit(
-            existingUser,
-            "UPDATE",
-            dataBefore,
-            dataAfter
-        );
-
-        return existingUser;
-    }
-
-    private void LogAudit(User user, string operation, string? dataBefore, string? dataAfter)
-    {
-        var audit = new UserLogs
+        public async Task DeleteAsync(long id)
         {
-            UserId = user.Id,
-            Operation = operation,
-            DataBefore = dataBefore,
-            DataAfter = dataAfter
-        };
+            var user = await _dataAccess.GetAll<User>().FirstOrDefaultAsync(u => u.Id == id);
+            if (user == null) throw new KeyNotFoundException($"User with Id {id} not found");
 
-        _dataAccess.Create(audit);
+            await LogAuditAsync(user, "DELETE", JsonSerializer.Serialize(user), null);
+
+            await _dataAccess.DeleteAsync(user);
+        }
+
+        public async Task<User> UpdateAsync(long id, UpdateUserDto userDto)
+        {
+            if (userDto == null) throw new ArgumentNullException(nameof(userDto));
+
+            var existingUser = await _dataAccess.GetAll<User>().FirstOrDefaultAsync(u => u.Id == id);
+            if (existingUser == null) throw new KeyNotFoundException($"User with Id {id} not found");
+
+            var before = JsonSerializer.Serialize(existingUser);
+
+            existingUser.Email = userDto.Email;
+            existingUser.Surname = userDto.Surname;
+            existingUser.Forename = userDto.Forename;
+            existingUser.DateOfBirth = userDto.DateOfBirth;
+            existingUser.IsActive = userDto.IsActive;
+
+            await _dataAccess.UpdateAsync(existingUser);
+
+            var after = JsonSerializer.Serialize(existingUser);
+            await LogAuditAsync(existingUser, "UPDATE", before, after);
+
+            return existingUser;
+        }
+
+        private async Task LogAuditAsync(User user, string operation, string? before, string? after)
+        {
+            var audit = new UserLogs
+            {
+                UserId = user.Id,
+                Operation = operation,
+                DataBefore = before,
+                DataAfter = after
+            };
+
+            await _dataAccess.CreateAsync(audit);
+        }
     }
 }

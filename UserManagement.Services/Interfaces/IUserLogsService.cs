@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using UserManagement.Models;
 
 namespace UserManagement.Services.Domain.Interfaces
 {
     public interface IUserLogsService
     {
-        IEnumerable<UserLogs> GetAll();
-        IEnumerable<UserLogs> GetAuditsForUser(long userId);
-        void AddAudit(UserLogs audit);
+        Task<IEnumerable<UserLogs>> GetAllAsync();
+        Task<IEnumerable<UserLogs>> GetAuditsForUserAsync(long userId);
+        Task AddAuditAsync(UserLogs audit);
     }
 }

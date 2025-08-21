@@ -1,13 +1,11 @@
 using System;
 using System.Collections.Generic;
-using FluentAssertions;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Moq;
 using UserManagement.Data.DTO;
 using UserManagement.Models;
 using UserManagement.Services.Domain.Interfaces;
 using UserManagement.WebMS.Controllers;
-using Xunit;
 
 namespace UserManagement.Data.Tests
 {
@@ -17,7 +15,7 @@ namespace UserManagement.Data.Tests
         private UsersController CreateController() => new(_userService.Object);
 
         [Fact]
-        public void List_WhenServiceReturnsUsers_ReturnsOkWithUsers()
+        public async Task List_WhenServiceReturnsUsers_ReturnsOkWithUsers()
         {
             // Arrange
             var controller = CreateController();
@@ -25,10 +23,10 @@ namespace UserManagement.Data.Tests
             {
                 new User { Id = 1, Forename = "A", Surname = "B", Email = "a@b.com", IsActive = true, DateOfBirth = new DateTime(2000,1,1) }
             };
-            _userService.Setup(s => s.GetAll()).Returns(users);
+            _userService.Setup(s => s.GetAllAsync()).ReturnsAsync(users);
 
             // Act
-            var result = controller.List();
+            var result = await controller.List();
 
             // Assert
             var ok = result.Should().BeOfType<OkObjectResult>().Subject;
@@ -36,7 +34,7 @@ namespace UserManagement.Data.Tests
         }
 
         [Fact]
-        public void Create_ValidDto_ReturnsCreatedAtActionWithEntity()
+        public async Task Create_ValidDto_ReturnsCreatedAtActionWithEntity()
         {
             // Arrange
             var controller = CreateController();
@@ -57,10 +55,10 @@ namespace UserManagement.Data.Tests
                 DateOfBirth = dto.DateOfBirth,
                 IsActive = dto.IsActive
             };
-            _userService.Setup(s => s.Create(It.IsAny<CreateUserDto>())).Returns(created);
+            _userService.Setup(s => s.CreateAsync(It.IsAny<CreateUserDto>())).ReturnsAsync(created);
 
             // Act
-            var result = controller.Create(dto);
+            var result = await controller.Create(dto);
 
             // Assert
             var createdAt = result.Should().BeOfType<CreatedAtActionResult>().Subject;
@@ -70,7 +68,7 @@ namespace UserManagement.Data.Tests
         }
 
         [Fact]
-        public void Create_InvalidModel_ReturnsBadRequest()
+        public async Task Create_InvalidModel_ReturnsBadRequest()
         {
             // Arrange
             var controller = CreateController();
@@ -78,47 +76,47 @@ namespace UserManagement.Data.Tests
             var dto = new CreateUserDto();
 
             // Act
-            var result = controller.Create(dto);
+            var result = await controller.Create(dto);
 
             // Assert
             result.Should().BeOfType<BadRequestObjectResult>();
-            _userService.Verify(s => s.Create(It.IsAny<CreateUserDto>()), Times.Never);
+            _userService.Verify(s => s.CreateAsync(It.IsAny<CreateUserDto>()), Times.Never);
         }
 
         [Fact]
-        public void Delete_ExistingUser_ReturnsNoContent()
+        public async Task Delete_ExistingUser_ReturnsNoContent()
         {
             // Arrange
             var controller = CreateController();
             var id = 1L;
-            _userService.Setup(s => s.Delete(id));
+            _userService.Setup(s => s.DeleteAsync(id)).Returns(Task.CompletedTask);
 
             // Act
-            var result = controller.Delete(id);
+            var result = await controller.Delete(id);
 
             // Assert
             result.Should().BeOfType<NoContentResult>();
-            _userService.Verify(s => s.Delete(id), Times.Once);
+            _userService.Verify(s => s.DeleteAsync(id), Times.Once);
         }
 
         [Fact]
-        public void Delete_MissingUser_ReturnsNotFound()
+        public async Task Delete_MissingUser_ReturnsNotFound()
         {
             // Arrange
             var controller = CreateController();
             var id = 999L;
-            _userService.Setup(s => s.Delete(id)).Throws<KeyNotFoundException>();
+            _userService.Setup(s => s.DeleteAsync(id)).ThrowsAsync(new KeyNotFoundException());
 
             // Act
-            var result = controller.Delete(id);
+            var result = await controller.Delete(id);
 
             // Assert
             result.Should().BeOfType<NotFoundResult>();
-            _userService.Verify(s => s.Delete(id), Times.Once);
+            _userService.Verify(s => s.DeleteAsync(id), Times.Once);
         }
 
         [Fact]
-        public void Update_ValidDto_ReturnsOkWithUpdatedUser()
+        public async Task Update_ValidDto_ReturnsOkWithUpdatedUser()
         {
             // Arrange
             var controller = CreateController();
@@ -140,10 +138,10 @@ namespace UserManagement.Data.Tests
                 DateOfBirth = dto.DateOfBirth,
                 IsActive = dto.IsActive
             };
-            _userService.Setup(s => s.Update(id, It.IsAny<UpdateUserDto>())).Returns(updated);
+            _userService.Setup(s => s.UpdateAsync(id, It.IsAny<UpdateUserDto>())).ReturnsAsync(updated);
 
             // Act
-            var result = controller.Update(id, dto);
+            var result = await controller.Update(id, dto);
 
             // Assert
             var ok = result.Should().BeOfType<OkObjectResult>().Subject;
@@ -151,7 +149,7 @@ namespace UserManagement.Data.Tests
         }
 
         [Fact]
-        public void Update_MissingUser_ReturnsNotFound()
+        public async Task Update_MissingUser_ReturnsNotFound()
         {
             // Arrange
             var controller = CreateController();
@@ -164,11 +162,11 @@ namespace UserManagement.Data.Tests
                 DateOfBirth = new DateTime(2001, 1, 1),
                 IsActive = false
             };
-            _userService.Setup(s => s.Update(id, It.IsAny < UpdateUserDto > ()))
-                        .Throws<KeyNotFoundException>();
+            _userService.Setup(s => s.UpdateAsync(id, It.IsAny<UpdateUserDto>()))
+                        .ThrowsAsync(new KeyNotFoundException());
 
             // Act
-            var result = controller.Update(id, dto);
+            var result = await controller.Update(id, dto);
 
             // Assert
             result.Should().BeOfType<NotFoundResult>();

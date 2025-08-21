@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using UserManagement.Models;
 using UserManagement.Services.Domain.Interfaces;
 using UserManagement.WebMS.Controllers;
-
 namespace UserManagement.Data.Tests
 {
     public class UserLogsControllerTests
@@ -14,15 +14,16 @@ namespace UserManagement.Data.Tests
         private UserLogsController CreateController() => new(_logsService.Object);
 
         [Fact]
-        public void GetAuditsByUserId_WhenNone_ReturnsOkWithEmptyArray()
+        public async Task GetAuditsByUserId_WhenNone_ReturnsOkWithEmptyArray()
         {
             // Arrange
             var controller = CreateController();
             long userId = 10;
-            _logsService.Setup(s => s.GetAuditsForUser(userId)).Returns(Enumerable.Empty<UserLogs>());
+            _logsService.Setup(s => s.GetAuditsForUserAsync(userId))
+                        .ReturnsAsync(Enumerable.Empty<UserLogs>());
 
             // Act
-            var result = controller.GetAuditsByUserId(userId);
+            var result = await controller.GetAuditsByUserId(userId);
 
             // Assert
             var ok = result.Should().BeOfType<OkObjectResult>().Subject;
@@ -31,7 +32,7 @@ namespace UserManagement.Data.Tests
         }
 
         [Fact]
-        public void GetAuditsByUserId_WhenSomeExist_ReturnsOkWithItems()
+        public async Task GetAuditsByUserId_WhenSomeExist_ReturnsOkWithItems()
         {
             // Arrange
             var controller = CreateController();
@@ -41,10 +42,10 @@ namespace UserManagement.Data.Tests
                 new UserLogs { Id = 1, UserId = userId, Operation = "CREATE", Timestamp = new DateTime(2024,1,1) },
                 new UserLogs { Id = 2, UserId = userId, Operation = "UPDATE", Timestamp = new DateTime(2025,1,1) },
             };
-            _logsService.Setup(s => s.GetAuditsForUser(userId)).Returns(audits);
+            _logsService.Setup(s => s.GetAuditsForUserAsync(userId)).ReturnsAsync(audits);
 
             // Act
-            var result = controller.GetAuditsByUserId(userId);
+            var result = await controller.GetAuditsByUserId(userId);
 
             // Assert
             var ok = result.Should().BeOfType<OkObjectResult>().Subject;
@@ -52,7 +53,7 @@ namespace UserManagement.Data.Tests
         }
 
         [Fact]
-        public void List_ReturnsOkWithAllLogs()
+        public async Task List_ReturnsOkWithAllLogs()
         {
             // Arrange
             var controller = CreateController();
@@ -61,10 +62,10 @@ namespace UserManagement.Data.Tests
                 new UserLogs { Id = 1, UserId = 10, Operation = "CREATE", Timestamp = new DateTime(2024,1,1) },
                 new UserLogs { Id = 2, UserId = 11, Operation = "DELETE", Timestamp = new DateTime(2024,2,1) },
             };
-            _logsService.Setup(s => s.GetAll()).Returns(all);
+            _logsService.Setup(s => s.GetAllAsync()).ReturnsAsync(all);
 
             // Act
-            var result = controller.List();
+            var result = await controller.List();
 
             // Assert
             var ok = result.Should().BeOfType<OkObjectResult>().Subject;

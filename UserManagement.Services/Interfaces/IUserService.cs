@@ -1,19 +1,16 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using UserManagement.Data.DTO;
 using UserManagement.Models;
 
-namespace UserManagement.Services.Domain.Interfaces;
-
-public interface IUserService 
+namespace UserManagement.Services.Domain.Interfaces
 {
-    /// <summary>
-    /// Return users by active state
-    /// </summary>
-    /// <param name="isActive"></param>
-    /// <returns></returns>
-    IEnumerable<User> FilterByActive(bool isActive);
-    IEnumerable<User> GetAll();
-    User Create(CreateUserDto userDto);
-    void Delete(long id);
-    User Update(long id, UpdateUserDto userDto);
+    public interface IUserService
+    {
+        Task<IEnumerable<User>> FilterByActiveAsync(bool isActive);
+        Task<IEnumerable<User>> GetAllAsync();
+        Task<User> CreateAsync(CreateUserDto userDto);
+        Task DeleteAsync(long id);
+        Task<User> UpdateAsync(long id, UpdateUserDto userDto);
+    }
 }

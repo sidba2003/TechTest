@@ -1,68 +1,63 @@
-﻿using UserManagement.Data.DTO;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using UserManagement.Data.DTO;
 using UserManagement.Models;
 using UserManagement.Services.Domain.Interfaces;
 
-namespace UserManagement.WebMS.Controllers;
-
-[ApiController]
-[Route("api/users/")]
-public class UsersController : ControllerBase
+namespace UserManagement.WebMS.Controllers
 {
-    private readonly IUserService _userService;
-    public UsersController(IUserService userService) => _userService = userService;
-
-    [HttpGet]
-    public IActionResult List()
+    [ApiController]
+    [Route("api/users/")]
+    public class UsersController : ControllerBase
     {
-        var items = _userService.GetAll();
+        private readonly IUserService _userService;
+        public UsersController(IUserService userService) => _userService = userService;
 
-        return Ok(items);
-    }
-
-    [HttpPost]
-    public IActionResult Create([FromBody] CreateUserDto newUser)
-    {
-        if (!ModelState.IsValid)
+        [HttpGet]
+        public async Task<IActionResult> List()
         {
-            return BadRequest(ModelState);
+            IEnumerable<User> items = await _userService.GetAllAsync();
+            return Ok(items);
         }
 
-        // Call service to create user
-        var createdUser = _userService.Create(newUser);
-
-        return CreatedAtAction(nameof(List), new { id = createdUser.Id }, createdUser);
-    }
-
-    [HttpDelete("{id}")]
-    public IActionResult Delete(long id)
-    {
-        try
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateUserDto newUser)
         {
-            _userService.Delete(id);
-            return NoContent(); // HTTP 204 – standard for successful DELETE
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound(); // HTTP 404 if user does not exist
-        }
-    }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-    [HttpPut("{id}")]
-    public IActionResult Update(long id, [FromBody] UpdateUserDto userDto)
-    {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
+            var createdUser = await _userService.CreateAsync(newUser);
+            return CreatedAtAction(nameof(List), new { id = createdUser.Id }, createdUser);
         }
 
-        try
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(long id)
         {
-            var updatedUser = _userService.Update(id, userDto);
-            return Ok(updatedUser);
+            try
+            {
+                await _userService.DeleteAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
         }
-        catch (KeyNotFoundException)
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(long id, [FromBody] UpdateUserDto userDto)
         {
-            return NotFound();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            try
+            {
+                var updatedUser = await _userService.UpdateAsync(id, userDto);
+                return Ok(updatedUser);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
         }
     }
 }

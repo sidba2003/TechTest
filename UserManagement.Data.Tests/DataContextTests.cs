@@ -1,73 +1,75 @@
+using System;
 using System.Linq;
-using UserManagement.Data;
+using System.Threading.Tasks;
+using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using UserManagement.Models;
+using Xunit;
 
 namespace UserManagement.Data.Tests
 {
     public class DataContextTests
     {
         [Fact]
-        public void GetAll_WhenNewEntityAdded_MustIncludeNewEntity()
+        public async Task GetAll_WhenNewEntityAdded_MustIncludeNewEntity()
         {
             // Arrange
-            using var context = CreateContext();
+            await using var context = CreateIsolatedContext();
             var entity = new User
             {
                 Forename = "Brand New",
                 Surname = "User",
                 Email = "brandnewuser@example.com",
-                DateOfBirth = new System.DateTime(1990, 1, 1),
+                DateOfBirth = new DateTime(1990, 1, 1),
                 IsActive = true
             };
 
             // Act
-            context.Create(entity);
-            var result = context.GetAll<User>().ToList();
+            await context.CreateAsync(entity);
+            var result = await context.GetAll<User>().ToListAsync();
 
             // Assert
             result.Should().ContainSingle(u => u.Email == entity.Email)
-                  .Which.Should().BeEquivalentTo(entity, opt => opt.Excluding(u => u.Id));
+                .Which.Should().BeEquivalentTo(entity, opt => opt.Excluding(u => u.Id));
         }
 
         [Fact]
-        public void GetAll_WhenDeleted_MustNotIncludeDeletedEntity()
+        public async Task GetAll_WhenDeleted_MustNotIncludeDeletedEntity()
         {
             // Arrange
-            using var context = CreateContext();
+            await using var context = CreateIsolatedContext();
             var entity = new User
             {
                 Forename = "ToDelete",
                 Surname = "User",
                 Email = "todelete@example.com",
-                DateOfBirth = new System.DateTime(1990, 1, 1),
+                DateOfBirth = new DateTime(1990, 1, 1),
                 IsActive = true
             };
-            context.Create(entity);
+            await context.CreateAsync(entity);
 
             // Act
-            context.Delete(entity);
-            var result = context.GetAll<User>().ToList();
+            await context.DeleteAsync(entity);
+            var result = await context.GetAll<User>().ToListAsync();
 
             // Assert
             result.Should().NotContain(u => u.Email == entity.Email);
         }
 
         [Fact]
-        public void GetAll_UserLogs_WhenNewLogAdded_MustIncludeNewLog()
+        public async Task GetAll_UserLogs_WhenNewLogAdded_MustIncludeNewLog()
         {
             // Arrange
-            using var context = CreateContext();
-
-            // create a user first (so we have a valid UserId to log against)
+            await using var context = CreateIsolatedContext();
             var user = new User
             {
                 Forename = "Audited",
                 Surname = "User",
                 Email = "audited@example.com",
-                DateOfBirth = new System.DateTime(1992, 2, 2),
+                DateOfBirth = new DateTime(1992, 2, 2),
                 IsActive = true
             };
-            context.Create(user);
+            await context.CreateAsync(user);
 
             var log = new UserLogs
             {
@@ -78,30 +80,52 @@ namespace UserManagement.Data.Tests
             };
 
             // Act
-            context.Create(log);
-            var logs = context.GetAll<UserLogs>().Where(l => l.UserId == user.Id).ToList();
+            await context.CreateAsync(log);
+            var logs = await context.GetAll<UserLogs>()
+                .Where(l => l.UserId == user.Id)
+                .ToListAsync();
 
             // Assert
             logs.Should().ContainSingle(l => l.Operation == "CREATE")
                 .Which.Should().BeEquivalentTo(log, opt => opt.Excluding(l => l.Id)
-                                                             .Excluding(l => l.Timestamp));
+                                                            .Excluding(l => l.Timestamp));
         }
 
         [Fact]
-        public void GetAll_UserLogs_WhenDeleted_MustNotIncludeDeletedLog()
+        public async Task UpdateAsync_User_ModifiesPersistedValues()
+        {
+            await using var ctx = CreateIsolatedContext();
+            var u = new User
+            {
+                Forename = "A",
+                Surname = "B",
+                Email = "u@example.com",
+                IsActive = true,
+                DateOfBirth = new(1990, 1, 1)
+            };
+            await ctx.CreateAsync(u);
+            u.Forename = "Updated";
+
+            await ctx.UpdateAsync(u);
+
+            var reloaded = await ctx.GetAll<User>().SingleAsync(x => x.Id == u.Id);
+            reloaded.Forename.Should().Be("Updated");
+        }
+
+        [Fact]
+        public async Task GetAll_UserLogs_WhenDeleted_MustNotIncludeDeletedLog()
         {
             // Arrange
-            using var context = CreateContext();
-
+            await using var context = CreateIsolatedContext();
             var user = new User
             {
                 Forename = "LogDel",
                 Surname = "User",
                 Email = "logdel@example.com",
-                DateOfBirth = new System.DateTime(1993, 3, 3),
+                DateOfBirth = new DateTime(1993, 3, 3),
                 IsActive = false
             };
-            context.Create(user);
+            await context.CreateAsync(user);
 
             var log = new UserLogs
             {
@@ -110,19 +134,31 @@ namespace UserManagement.Data.Tests
                 DataBefore = "{\"email\":\"logdel@example.com\"}",
                 DataAfter = null
             };
-            context.Create(log);
+            await context.CreateAsync(log);
 
             // sanity: log exists
-            context.GetAll<UserLogs>().Any(l => l.Id == log.Id).Should().BeTrue();
+            (await context.GetAll<UserLogs>().AnyAsync(l => l.Id == log.Id)).Should().BeTrue();
 
             // Act
-            context.Delete(log);
-            var logs = context.GetAll<UserLogs>().Where(l => l.UserId == user.Id).ToList();
+            await context.DeleteAsync(log);
+            var logs = await context.GetAll<UserLogs>()
+                .Where(l => l.UserId == user.Id)
+                .ToListAsync();
 
             // Assert
             logs.Should().NotContain(l => l.Id == log.Id);
         }
 
-        private DataContext CreateContext() => new();
+        // Removed CreateContext(); always use an isolated database per test
+        private static DataContext CreateIsolatedContext(bool ensureCreated = true)
+        {
+            var options = new DbContextOptionsBuilder<DataContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString()) // unique DB per test
+                .Options;
+
+            var ctx = new DataContext(options);
+            if (ensureCreated) ctx.Database.EnsureCreated(); // apply seeding when desired
+            return ctx;
+        }
     }
 }

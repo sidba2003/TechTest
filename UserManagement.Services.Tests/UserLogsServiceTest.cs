@@ -1,85 +1,65 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using UserManagement.Data;
 using UserManagement.Models;
 using UserManagement.Services.Domain.Implementations;
 
 namespace UserManagement.Data.Tests
 {
-    public class UserLogsServiceTests
+    public class UserLogsServiceTest
     {
-        private readonly Mock<IDataContext> _dataContext = new();
-        private UserLogsService CreateService() => new(_dataContext.Object);
-
-        [Fact]
-        public void GetAll_ReturnsLogs_OrderedByTimestampDescending()
+        private static DataContext NewCleanContext()
         {
-            // Arrange
-            var service = CreateService();
-            var logs = new List<UserLogs>
-            {
-                new UserLogs { Id = 1, UserId = 10, Operation = "CREATE", Timestamp = new DateTime(2024,1,1) },
-                new UserLogs { Id = 2, UserId = 10, Operation = "UPDATE", Timestamp = new DateTime(2025,1,1) },
-                new UserLogs { Id = 3, UserId = 11, Operation = "DELETE", Timestamp = new DateTime(2023,1,1) },
-            }.AsQueryable();
+            var options = new DbContextOptionsBuilder<DataContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString()) // unique per test
+                .Options;
 
-            _dataContext.Setup(d => d.GetAll<UserLogs>()).Returns(logs);
-
-            // Act
-            var result = service.GetAll().ToList();
-
-            // Assert
-            result.Should().HaveCount(3);
-            result.Select(r => r.Id).Should().Equal(2, 1, 3); // 2025, 2024, 2023
+            return new DataContext(options);
         }
 
         [Fact]
-        public void GetAuditsForUser_FiltersAndOrdersDescending()
+        public async Task GetAllAsync_Returns_DescendingByTimestamp()
         {
-            // Arrange
-            var service = CreateService();
-            var logs = new List<UserLogs>
-            {
-                new UserLogs { Id = 1, UserId = 10, Operation = "CREATE", Timestamp = new DateTime(2024,1,1) },
-                new UserLogs { Id = 2, UserId = 10, Operation = "UPDATE", Timestamp = new DateTime(2025,1,1) },
-                new UserLogs { Id = 3, UserId = 11, Operation = "DELETE", Timestamp = new DateTime(2023,1,1) },
-            }.AsQueryable();
+            await using var context = NewCleanContext();
+            var service = new UserLogsService(context);
 
-            _dataContext.Setup(d => d.GetAll<UserLogs>()).Returns(logs);
+            await context.CreateAsync(new UserLogs { UserId = 10, Operation = "CREATE", Timestamp = new DateTime(2024, 1, 1) });
+            await context.CreateAsync(new UserLogs { UserId = 10, Operation = "UPDATE", Timestamp = new DateTime(2025, 1, 1) });
+            await context.CreateAsync(new UserLogs { UserId = 11, Operation = "DELETE", Timestamp = new DateTime(2023, 1, 1) });
 
-            // Act
-            var result = service.GetAuditsForUser(10).ToList();
+            var all = (await service.GetAllAsync()).ToList();
 
-            // Assert
-            result.Should().HaveCount(2);
-            result.Select(r => r.Id).Should().Equal(2, 1);
-            result.All(r => r.UserId == 10).Should().BeTrue();
+            all.Select(l => l.Timestamp).Should().BeInDescendingOrder();
+            all.Select(l => l.Operation).Should().Equal("UPDATE", "CREATE", "DELETE");
         }
 
         [Fact]
-        public void AddAudit_Null_Throws()
+        public async Task GetAuditsForUserAsync_FiltersToUser_And_OrdersDescending()
         {
-            // Arrange
-            var service = CreateService();
+            await using var context = NewCleanContext();
 
-            // Act
-            Action act = () => service.AddAudit(null!);
+            await context.CreateAsync(new UserLogs { UserId = 10, Operation = "CREATE", Timestamp = new DateTime(2024, 1, 1) });
+            await context.CreateAsync(new UserLogs { UserId = 10, Operation = "UPDATE", Timestamp = new DateTime(2025, 1, 1) });
+            await context.CreateAsync(new UserLogs { UserId = 11, Operation = "DELETE", Timestamp = new DateTime(2023, 1, 1) });
 
-            // Assert
-            act.Should().Throw<ArgumentNullException>().WithParameterName("audit");
-            _dataContext.Verify(d => d.Create(It.IsAny<UserLogs>()), Times.Never);
+            (await context.UserAudits!.CountAsync()).Should().Be(3);
+
+            var service = new UserLogsService(context);
+
+            var user10 = (await service.GetAuditsForUserAsync(10)).ToList();
+
+            user10.Should().HaveCount(2);
+            user10.All(l => l.UserId == 10).Should().BeTrue();
+            user10.Select(l => l.Operation).Should().Equal("UPDATE", "CREATE");
         }
 
         [Fact]
-        public void AddAudit_PersistsAudit()
+        public async Task AddAuditAsync_Persists()
         {
-            // Arrange
-            var service = CreateService();
-            UserLogs? captured = null;
-
-            _dataContext.Setup(d => d.Create(It.IsAny<UserLogs>()))
-                        .Callback<UserLogs>(a => captured = a);
+            await using var context = NewCleanContext();
+            var service = new UserLogsService(context);
 
             var audit = new UserLogs
             {
@@ -89,17 +69,47 @@ namespace UserManagement.Data.Tests
                 DataAfter = "{\"x\":2}"
             };
 
-            // Act
-            service.AddAudit(audit);
+            await service.AddAuditAsync(audit);
 
-            // Assert
-            captured.Should().NotBeNull();
-            captured!.UserId.Should().Be(99);
-            captured.Operation.Should().Be("UPDATE");
-            captured.DataBefore.Should().Contain("1");
-            captured.DataAfter.Should().Contain("2");
+            var fromDb = await context.UserAudits!.SingleAsync();
+            fromDb.UserId.Should().Be(99);
+            fromDb.Operation.Should().Be("UPDATE");
+            fromDb.DataBefore.Should().Contain("\"x\":1");
+            fromDb.DataAfter.Should().Contain("\"x\":2");
+        }
 
-            _dataContext.Verify(d => d.Create(It.IsAny<UserLogs>()), Times.Once);
+        [Fact]
+        public async Task AddAuditAsync_Null_Throws()
+        {
+            await using var context = NewCleanContext();
+            var service = new UserLogsService(context);
+
+            var act = async () => await service.AddAuditAsync(null!);
+
+            await act.Should().ThrowAsync<ArgumentNullException>()
+                     .WithParameterName("audit");
+        }
+
+        [Fact]
+        public async Task GetAllAsync_WhenNoLogs_ReturnsEmpty()
+        {
+            await using var context = NewCleanContext();
+            var svc = new UserLogsService(context);
+
+            var all = await svc.GetAllAsync();
+            all.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task GetAuditsForUserAsync_WhenNoLogsForUser_ReturnsEmpty()
+        {
+            await using var context = NewCleanContext();
+            await context.CreateAsync(new UserLogs { UserId = 42, Operation = "CREATE", Timestamp = new DateTime(2024, 1, 1) });
+
+            var svc = new UserLogsService(context);
+            var logs = await svc.GetAuditsForUserAsync(99);
+
+            logs.Should().BeEmpty();
         }
     }
 }

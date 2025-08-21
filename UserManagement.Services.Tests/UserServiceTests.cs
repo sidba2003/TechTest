@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using UserManagement.Data;
 using UserManagement.Data.DTO;
 using UserManagement.Models;
@@ -8,30 +11,23 @@ using UserManagement.Services.Domain.Implementations;
 
 namespace UserManagement.Data.Tests
 {
-    public class UserServiceTests
+    public class UserServiceTest
     {
-        private readonly Mock<IDataContext> _dataContext = new();
-        private UserService CreateService() => new(_dataContext.Object);
-
-        [Fact]
-        public void GetAll_WhenContextReturnsEntities_MustReturnSameEntities()
+        private static DataContext NewCleanContext()
         {
-            // Arrange
-            var service = CreateService();
-            var users = SetupUsers();
+            var options = new DbContextOptionsBuilder<DataContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString()) // unique per test
+                .Options;
 
-            // Act
-            var result = service.GetAll();
-
-            // Assert
-            result.Should().BeEquivalentTo(users);
+            return new DataContext(options);
         }
 
         [Fact]
-        public void Create_ValidUser_CreatesUser_And_WritesAudit()
+        public async Task GetAllAsync_WhenNewUserAdded_ContainsIt()
         {
-            // Arrange
-            var service = CreateService();
+            await using var context = NewCleanContext();
+            var service = new UserService(context);
+
             var dto = new CreateUserDto
             {
                 Forename = "Alice",
@@ -40,182 +36,233 @@ namespace UserManagement.Data.Tests
                 DateOfBirth = new DateTime(1995, 1, 1),
                 IsActive = true
             };
+            await service.CreateAsync(dto);
 
-            // Simulate EF setting an Id on insert
-            User? capturedUser = null;
-            _dataContext
-                .Setup(d => d.Create(It.IsAny<User>()))
-                .Callback<User>(u =>
-                {
-                    u.Id = 42; // simulate DB-generated Id
-                    capturedUser = u;
-                });
+            var all = await service.GetAllAsync();
 
-            UserLogs? capturedAudit = null;
-            _dataContext
-                .Setup(d => d.Create(It.IsAny<UserLogs>()))
-                .Callback<object>(o =>
-                {
-                    capturedAudit = (UserLogs)o;
-                });
-
-            // Act
-            var result = service.Create(dto);
-
-            // Assert (user persisted)
-            capturedUser.Should().NotBeNull();
-            capturedUser!.Forename.Should().Be(dto.Forename);
-            capturedUser.Surname.Should().Be(dto.Surname);
-            capturedUser.Email.Should().Be(dto.Email);
-            capturedUser.DateOfBirth.Should().Be(dto.DateOfBirth);
-            capturedUser.IsActive.Should().Be(dto.IsActive);
-            capturedUser.Id.Should().Be(42);
-
-            result.Should().BeEquivalentTo(capturedUser);
-
-            // Assert (audit persisted)
-            capturedAudit.Should().NotBeNull();
-            capturedAudit!.UserId.Should().Be(42);
-            capturedAudit.Operation.Should().Be("CREATE");
-            capturedAudit.DataBefore.Should().BeNull();
-            capturedAudit.DataAfter.Should().NotBeNullOrEmpty();
-            capturedAudit.DataAfter!.Should().Contain("alice@test.com");
-
-            _dataContext.Verify(d => d.Create(It.IsAny<User>()), Times.Once);
-            _dataContext.Verify(d => d.Create(It.IsAny<UserLogs>()), Times.Once);
+            all.Should().Contain(u => u.Email == "alice@test.com");
         }
 
         [Fact]
-        public void Update_ExistingUser_UpdatesEntity_And_WritesAudit_WithBeforeAndAfter()
+        public async Task CreateAsync_PersistsUser_And_WritesCreateAudit()
         {
-            // Arrange
-            var service = CreateService();
+            await using var context = NewCleanContext();
+            var service = new UserService(context);
 
-            var existing = new User
+            var dto = new CreateUserDto
             {
-                Id = 7,
+                Forename = "Bob",
+                Surname = "Builder",
+                Email = "bob@example.com",
+                DateOfBirth = new DateTime(1990, 2, 2),
+                IsActive = true
+            };
+
+            var created = await service.CreateAsync(dto);
+
+            var fromDb = await context.Users!.FirstOrDefaultAsync(u => u.Id == created.Id);
+            fromDb.Should().NotBeNull();
+            fromDb!.Email.Should().Be("bob@example.com");
+
+            var audit = await context.UserAudits!.Where(a => a.UserId == created.Id).SingleAsync();
+            audit.Operation.Should().Be("CREATE");
+            audit.DataBefore.Should().BeNull();
+            audit.DataAfter.Should().Contain("bob@example.com");
+        }
+
+        [Fact]
+        public async Task UpdateAsync_ExistingUser_Updates_And_WritesUpdateAudit()
+        {
+            await using var context = NewCleanContext();
+            var service = new UserService(context);
+
+            var created = await service.CreateAsync(new CreateUserDto
+            {
                 Forename = "Old",
                 Surname = "Name",
                 Email = "old@example.com",
                 DateOfBirth = new DateTime(1990, 1, 1),
                 IsActive = false
-            };
+            });
 
-            _dataContext.Setup(d => d.GetAll<User>())
-                        .Returns(new List<User> { existing }.AsQueryable());
-
-            User? updatedEntity = null;
-            _dataContext.Setup(d => d.Update(It.IsAny<User>()))
-                        .Callback<User>(u => updatedEntity = u);
-
-            UserLogs? capturedAudit = null;
-            _dataContext.Setup(d => d.Create(It.IsAny<UserLogs>()))
-                        .Callback<object>(o => capturedAudit = (UserLogs)o);
-
-            var dto = new UpdateUserDto
+            var updated = await service.UpdateAsync(created.Id, new UpdateUserDto
             {
                 Forename = "New",
                 Surname = "Name",
                 Email = "new@example.com",
                 DateOfBirth = new DateTime(1991, 2, 2),
                 IsActive = true
-            };
+            });
 
-            // Act
-            var result = service.Update(existing.Id, dto);
+            updated.Email.Should().Be("new@example.com");
 
-            // Assert entity updated
-            updatedEntity.Should().NotBeNull();
-            updatedEntity!.Id.Should().Be(existing.Id);
-            updatedEntity.Forename.Should().Be(dto.Forename);
-            updatedEntity.Surname.Should().Be(dto.Surname);
-            updatedEntity.Email.Should().Be(dto.Email);
-            updatedEntity.DateOfBirth.Should().Be(dto.DateOfBirth);
-            updatedEntity.IsActive.Should().Be(dto.IsActive);
+            var audit = await context.UserAudits!
+                .Where(a => a.UserId == created.Id && a.Operation == "UPDATE")
+                .SingleAsync();
 
-            result.Should().BeEquivalentTo(updatedEntity);
-
-            // Assert audit
-            capturedAudit.Should().NotBeNull();
-            capturedAudit!.UserId.Should().Be(existing.Id);
-            capturedAudit.Operation.Should().Be("UPDATE");
-            capturedAudit.DataBefore.Should().NotBeNullOrEmpty();
-            capturedAudit.DataAfter.Should().NotBeNullOrEmpty();
-            capturedAudit.DataBefore!.Should().Contain("old@example.com");
-            capturedAudit.DataAfter!.Should().Contain("new@example.com");
-
-            _dataContext.Verify(d => d.Update(It.IsAny<User>()), Times.Once);
-            _dataContext.Verify(d => d.Create(It.IsAny<UserLogs>()), Times.Once);
+            audit.DataBefore.Should().Contain("old@example.com");
+            audit.DataAfter.Should().Contain("new@example.com");
         }
 
         [Fact]
-        public void Delete_ExistingUser_DeletesEntity_And_WritesAudit()
+        public async Task DeleteAsync_ExistingUser_Deletes_And_WritesDeleteAudit()
         {
-            // Arrange
-            var service = CreateService();
-            var users = SetupUsers();
-            var idToDelete = users.First().Id;
+            await using var context = NewCleanContext();
+            var service = new UserService(context);
 
-            User? deletedEntity = null;
-            _dataContext.Setup(d => d.Delete(It.IsAny<User>()))
-                        .Callback<User>(u => deletedEntity = u);
-
-            UserLogs? capturedAudit = null;
-            _dataContext.Setup(d => d.Create(It.IsAny<UserLogs>()))
-                        .Callback<object>(o => capturedAudit = (UserLogs)o);
-
-            // Act
-            service.Delete(idToDelete);
-
-            // Assert delete called
-            deletedEntity.Should().NotBeNull();
-            deletedEntity!.Id.Should().Be(idToDelete);
-
-            // Assert audit called
-            capturedAudit.Should().NotBeNull();
-            capturedAudit!.UserId.Should().Be(idToDelete);
-            capturedAudit.Operation.Should().Be("DELETE");
-            capturedAudit.DataBefore.Should().NotBeNullOrEmpty();
-            capturedAudit.DataAfter.Should().BeNull();
-
-            _dataContext.Verify(d => d.Delete(It.Is < User > (u => u.Id == idToDelete)), Times.Once);
-            _dataContext.Verify(d => d.Create(It.IsAny<UserLogs>()), Times.Once);
-        }
-
-        [Fact]
-        public void Delete_NonExistingUser_ShouldThrowKeyNotFoundException()
-        {
-            // Arrange
-            var service = CreateService();
-            _dataContext.Setup(d => d.GetAll<User>()).Returns(new List<User>().AsQueryable());
-
-            // Act
-            Action act = () => service.Delete(999);
-
-            // Assert
-            act.Should().Throw<KeyNotFoundException>().WithMessage("User with Id 999 not found");
-            _dataContext.Verify(d => d.Create(It.IsAny<UserLogs>()), Times.Never);
-            _dataContext.Verify(d => d.Delete(It.IsAny<User>()), Times.Never);
-        }
-
-        private IQueryable<User> SetupUsers()
-        {
-            var users = new List<User>
+            var created = await service.CreateAsync(new CreateUserDto
             {
-                new User
-                {
-                    Id = 1,
-                    Forename = "Johnny",
-                    Surname = "User",
-                    Email = "juser@example.com",
-                    IsActive = true,
-                    DateOfBirth = new DateTime(1990, 1, 1)
-                }
-            }.AsQueryable();
+                Forename = "Del",
+                Surname = "User",
+                Email = "del@example.com",
+                DateOfBirth = new DateTime(1980, 1, 1),
+                IsActive = true
+            });
 
-            _dataContext.Setup(d => d.GetAll<User>()).Returns(users);
+            await service.DeleteAsync(created.Id);
 
-            return users;
+            // user gone
+            (await context.Users!.AnyAsync(u => u.Id == created.Id)).Should().BeFalse();
+
+            // specifically fetch the DELETE audit (there’s also a CREATE audit)
+            var audit = await context.UserAudits!
+                .SingleAsync(a => a.UserId == created.Id && a.Operation == "DELETE");
+
+            audit.Operation.Should().Be("DELETE");
+            audit.DataBefore.Should().Contain("del@example.com");
+            audit.DataAfter.Should().BeNull();
+        }
+
+
+        [Fact]
+        public async Task DeleteAsync_NonExisting_Throws_KeyNotFoundException()
+        {
+            await using var context = NewCleanContext();
+            var service = new UserService(context);
+
+            var act = async () => await service.DeleteAsync(999);
+            await act.Should().ThrowAsync<KeyNotFoundException>()
+                     .WithMessage("User with Id 999 not found");
+        }
+
+        [Fact]
+        public async Task FilterByActiveAsync_ReturnsOnlyRequestedState()
+        {
+            await using var context = NewCleanContext();
+            var svc = new UserService(context);
+
+            await svc.CreateAsync(new CreateUserDto { Forename = "A", Surname = "X", Email = "a@x.com", DateOfBirth = new(1990, 1, 1), IsActive = true });
+            await svc.CreateAsync(new CreateUserDto { Forename = "B", Surname = "Y", Email = "b@y.com", DateOfBirth = new(1990, 1, 1), IsActive = false });
+
+            var actives = (await svc.FilterByActiveAsync(true)).Select(u => u.Email).ToList();
+            var inactives = (await svc.FilterByActiveAsync(false)).Select(u => u.Email).ToList();
+
+            actives.Should().Contain("a@x.com").And.NotContain("b@y.com");
+            inactives.Should().Contain("b@y.com").And.NotContain("a@x.com");
+        }
+
+        [Fact]
+        public async Task CreateAsync_NullDto_Throws()
+        {
+            await using var context = NewCleanContext();
+            var svc = new UserService(context);
+
+            var act = () => svc.CreateAsync(null!);
+            await act.Should().ThrowAsync<ArgumentNullException>()
+                     .WithParameterName("userDto");
+        }
+
+        [Fact]
+        public async Task UpdateAsync_NullDto_Throws()
+        {
+            await using var context = NewCleanContext();
+            var svc = new UserService(context);
+
+            var act = () => svc.UpdateAsync(123, null!);
+            await act.Should().ThrowAsync<ArgumentNullException>()
+                     .WithParameterName("userDto");
+        }
+
+        [Fact]
+        public async Task UpdateAsync_NonExisting_Throws_KeyNotFoundException()
+        {
+            await using var context = NewCleanContext();
+            var svc = new UserService(context);
+
+            var act = () => svc.UpdateAsync(999, new UpdateUserDto
+            {
+                Forename = "X",
+                Surname = "Y",
+                Email = "x@y.com",
+                DateOfBirth = new(1990, 1, 1),
+                IsActive = true
+            });
+
+            await act.Should().ThrowAsync<KeyNotFoundException>()
+                     .WithMessage("User with Id 999 not found");
+        }
+
+        [Fact]
+        public async Task CreateAsync_SetsId_And_AuditLinksToCreatedUser()
+        {
+            await using var context = NewCleanContext();
+            var svc = new UserService(context);
+
+            var created = await svc.CreateAsync(new CreateUserDto
+            {
+                Forename = "C",
+                Surname = "Z",
+                Email = "c@z.com",
+                DateOfBirth = new(1990, 1, 1),
+                IsActive = true
+            });
+
+            created.Id.Should().BeGreaterThan(0);
+
+            var audit = await context.UserAudits!.SingleAsync(a => a.Operation == "CREATE");
+            audit.UserId.Should().Be(created.Id);
+            audit.DataBefore.Should().BeNull();
+
+            var after = System.Text.Json.JsonSerializer.Deserialize<User>(audit.DataAfter!);
+            after.Should().NotBeNull();
+            after!.Email.Should().Be("c@z.com");
+        }
+
+        [Fact]
+        public async Task UpdateAsync_WritesAccurateBeforeAfterSnapshots()
+        {
+            await using var context = NewCleanContext();
+            var svc = new UserService(context);
+
+            var u = await svc.CreateAsync(new CreateUserDto
+            {
+                Forename = "Old",
+                Surname = "Name",
+                Email = "old@ex.com",
+                DateOfBirth = new(1990, 1, 1),
+                IsActive = false
+            });
+
+            await svc.UpdateAsync(u.Id, new UpdateUserDto
+            {
+                Forename = "New",
+                Surname = "Name",
+                Email = "new@ex.com",
+                DateOfBirth = new(1991, 2, 2),
+                IsActive = true
+            });
+
+            var audit = await context.UserAudits!.SingleAsync(a => a.UserId == u.Id && a.Operation == "UPDATE");
+
+            var before = JsonSerializer.Deserialize<User>(audit.DataBefore!);
+            var after = JsonSerializer.Deserialize<User>(audit.DataAfter!);
+
+            before!.Email.Should().Be("old@ex.com");
+            before.IsActive.Should().BeFalse();
+
+            after!.Email.Should().Be("new@ex.com");
+            after.IsActive.Should().BeTrue();
+            after.Forename.Should().Be("New");
         }
     }
 }

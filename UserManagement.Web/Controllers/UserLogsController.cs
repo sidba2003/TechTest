@@ -1,6 +1,6 @@
 ﻿using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using UserManagement.Services.Domain.Implementations;
 using UserManagement.Services.Domain.Interfaces;
 
 namespace UserManagement.WebMS.Controllers
@@ -10,28 +10,20 @@ namespace UserManagement.WebMS.Controllers
     public class UserLogsController : ControllerBase
     {
         private readonly IUserLogsService _auditService;
-
-        public UserLogsController(IUserLogsService auditService)
-        {
-            _auditService = auditService;
-        }
+        public UserLogsController(IUserLogsService auditService) => _auditService = auditService;
 
         [HttpGet("{userId}")]
-        public IActionResult GetAuditsByUserId(long userId)
+        public async Task<IActionResult> GetAuditsByUserId(long userId)
         {
-            var audits = _auditService.GetAuditsForUser(userId);
-
-            if (audits == null || !audits.Any())
-                return Ok(new object[0]);
-
+            var audits = await _auditService.GetAuditsForUserAsync(userId);
+            if (audits == null || !audits.Any()) return Ok(System.Array.Empty<object>());
             return Ok(audits);
         }
 
         [HttpGet]
-        public IActionResult List()
+        public async Task<IActionResult> List()
         {
-            var items = _auditService.GetAll();
-
+            var items = await _auditService.GetAllAsync();
             return Ok(items);
         }
     }
