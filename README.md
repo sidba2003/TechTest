@@ -12,7 +12,7 @@ The two tasks I have done as part of the **Expert** section are:
 
 2.> **Implement the bundling of static assets**, the front end is bundled and served when the project is built, the user just has to build / run the project and go to root path "/"
 
-For the **advanced section** tasks, the operations against an user and throughout the application is displayed through a common component (only the data passed is different in each case).
+For the **advanced section** tasks, the operations against an user and throughout the application is displayed through a common component (only the data passed to the component is different in each case).
 
 I have implemented the options to filter the operations by the type of HTTP request and pagination (you can see 5, 10 and 20 operations at once).
 
