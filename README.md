@@ -12,9 +12,17 @@ The two tasks I have done as part of the **Expert** section are:
 
 2.> **Implement the bundling of static assets**, the front end is bundled and served when the project is built, the user just has to build / run the project and go to root path "/"
 
+For the **advanced section** tasks, the operations against an user and throughout the application is displayed through a common component (only the data passed is different in each case).
+
+I have implemented the options to filter the operations by the type of HTTP request and pagination (you can see 5, 10 and 20 operations at once).
+
+A potential enhancement in this case could have been to implement options for even more filters (such as by email, user id, etc.)
+
+But due to the time constraints, I decided against it.
+
 ## Further Enhancements
 
-I have added the unit tests for the backend, although my frontend doesnt have any testing which can be re-run (as I primarily relied on manual testing), but I believe the implementation of full E2E testing would have been nice (using libraries such as Playwright).
+I have added the unit tests for the backend, although my frontend doesnt have any testing which can be re-run (as I primarily relied on manual testing for the same), but I believe the implementation of full E2E testing would have been nice (using libraries such as Playwright).
 
 # User Management Technical Exercise
 
