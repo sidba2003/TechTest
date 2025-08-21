@@ -1,3 +1,19 @@
+# Project Completion ReadMe (Siddharth Bahl)
+
+Please go through this section to understand a bit more about the work I have done.
+
+##Sections Completed
+I have completed all the tasks within the **Standard** and the **Advanced** sections.
+
+Furthermore, I have done two tasks within the **Expert** section:
+
+1.> Which is to re-implement the UI using a client side library and have it interact with API endpoints, I have implemented the same in React (and the same can be found under react_app in wwwroot). 
+2.> Implement the bundling of static assets, the front end is bundled and served when the project is built, the user just has to build / run the project and go to root path "/"
+
+##Further Enhancements
+
+I have added the unit tests for the backend, although my frontend doesnt have any testing which can be re-run (as I primarily relied on manual testing), but I believe the implementation of full E2E testing would be nice (using libraries such as Playwright).
+
 # User Management Technical Exercise
 
 The exercise is an ASP.NET Core web application backed by Entity Framework Core, which faciliates management of some fictional users.
