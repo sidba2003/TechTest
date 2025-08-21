@@ -4,17 +4,17 @@ Please go through this section to understand a bit more about the work I have do
 
 ## Sections Completed
 
-I have completed all the tasks within the **Standard** and the **Advanced** sections.
+I have completed all the tasks within the **Standard** and the **Advanced** sections, along with two tasks of the **Expert** section.
 
-Furthermore, I have done two tasks within the **Expert** section:
+The two tasks I have done as part of the **Expert** section are:
 
-1.> Which is to re-implement the UI using a client side library and have it interact with API endpoints, I have implemented the same in React (and the same can be found under react_app in wwwroot). 
+1.> **re-implement the UI using a client side library** and have it interact with API endpoints, I have implemented the same in React (and the same can be found under react_app in wwwroot), and the interactions with the backend is through endpoints. 
 
-2.> Implement the bundling of static assets, the front end is bundled and served when the project is built, the user just has to build / run the project and go to root path "/"
+2.> **Implement the bundling of static assets**, the front end is bundled and served when the project is built, the user just has to build / run the project and go to root path "/"
 
 ## Further Enhancements
 
-I have added the unit tests for the backend, although my frontend doesnt have any testing which can be re-run (as I primarily relied on manual testing), but I believe the implementation of full E2E testing would be nice (using libraries such as Playwright).
+I have added the unit tests for the backend, although my frontend doesnt have any testing which can be re-run (as I primarily relied on manual testing), but I believe the implementation of full E2E testing would have been nice (using libraries such as Playwright).
 
 # User Management Technical Exercise
 
