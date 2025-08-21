@@ -32,9 +32,7 @@ export default function ViewLogsComponent() {
                 Application Logs
             </div>
 
-            <div className="user-operations-class">
-                { logs.length > 0 ? <LogComponent operations={logs} /> : <span>No logs have been logged into the app so far!</span> }
-            </div>
+            { logs.length > 0 ? <LogComponent operations={logs} /> : <span>No logs have been logged into the app so far!</span> }
         </div>
     );
 }

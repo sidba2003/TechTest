@@ -44,9 +44,9 @@ export default function ViewUserComponent() {
             </div>
             
             <div className="operations-header-class">Previous Operations</div>
-            <div className="user-operations-class">
-                { userHistory.length > 0 ? <LogComponent operations={userHistory} /> : <span>User with id {userData.id} does not have any associated operations to show!</span> }
-            </div>
+            
+            { userHistory.length > 0 ? <LogComponent operations={userHistory} /> : <span>User with id {userData.id} does not have any associated operations to show!</span> }
+
         </div>
     );
 }
