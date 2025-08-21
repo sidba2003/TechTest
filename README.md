@@ -10,7 +10,7 @@ The two tasks I have done as part of the **Expert** section are:
 
 1.> **re-implement the UI using a client side library** and have it interact with API endpoints, I have implemented the same in React (and the same can be found under react_app in wwwroot), and the interactions with the backend is through endpoints. 
 
-2.> **Implement the bundling of static assets**, the front end is bundled and served when the project is built, the user just has to build / run the project and go to root path "/"
+2.> **Implement the bundling of static assets**, the front end is automatically bundled when the project is built, the user just has to build and run the project, and go to root path "/"
 
 For the **advanced section** tasks, the operations against an user and throughout the application is displayed through a common component (only the data passed to the component is different in each case).
 
