@@ -13,7 +13,6 @@ namespace UserManagement.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
-            // Only set a default if not already configured (tests/app can supply their own)
             if (!options.IsConfigured)
             {
                 options.UseInMemoryDatabase("UserManagement.Data.DataContext");

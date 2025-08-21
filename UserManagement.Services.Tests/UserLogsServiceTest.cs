@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using UserManagement.Data;
 using UserManagement.Models;
 using UserManagement.Services.Domain.Implementations;
 
@@ -13,7 +12,7 @@ namespace UserManagement.Data.Tests
         private static DataContext NewCleanContext()
         {
             var options = new DbContextOptionsBuilder<DataContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString()) // unique per test
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options;
 
             return new DataContext(options);
