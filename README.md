@@ -22,7 +22,7 @@ But due to the time constraints, I decided against it.
 
 ## Further Enhancements
 
-I have added the unit tests for the backend, although my frontend doesnt have any testing which can be re-run (as I primarily relied on manual testing for the same), but I believe the implementation of full E2E testing would have been nice (using libraries such as Playwright).
+I have added the unit tests for the backend, although my frontend doesnt have any testing which can be re-run (as I primarily relied on manual testing for the same), but I believe the implementation unit tests for the front end and E2E tests for the full stack would have been nice (using libraries such as Playwright).
 
 # User Management Technical Exercise
 
