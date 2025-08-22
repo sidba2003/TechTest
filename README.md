@@ -26,7 +26,7 @@ I have added the unit tests for the backend, although my frontend doesnt have an
 
 ## Additional Tools
 
-**npm** will need to be installed, as the project automatically installs and buils the react app whenever the project is built.
+**npm** and **node** will need to be installed, as the project automatically installs thenode dependencies and builds the react app whenever the project is built.
 
 # User Management Technical Exercise
 
