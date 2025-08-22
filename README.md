@@ -24,6 +24,10 @@ But due to the time constraints, I decided against it.
 
 I have added the unit tests for the backend, although my frontend doesnt have any testing which can be re-run (as I primarily relied on manual testing for the same), but I believe the implementation unit tests for the front end and E2E tests for the full stack would have been nice (using libraries such as Playwright).
 
+## Additional Tools
+
+**npm** will need to be installed, as the project automatically installs and buils the react_app whenever the project is built.
+
 # User Management Technical Exercise
 
 The exercise is an ASP.NET Core web application backed by Entity Framework Core, which faciliates management of some fictional users.
